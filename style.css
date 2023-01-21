@@ -1,15 +1,32 @@
-body{
-    display:flex;
+body, main, div, h1 {
     justify-content: center;
     align-items: center;
-}
-main{
-    width:50%;
-    height:100%;
-    display:flex;
+    display: flex;
     flex-wrap:wrap;
-    justify-content: center;
-    align-items: center;
+    text-align: center;
+    font-size: 11pt;
+}
+
+body {
+    flex-direction: column;
+}
+
+h1{
+    border-bottom: 1px solid #ccc;
+    font-weight: 200;
+    color: #555;
+    height:150px;
+    width: 600px;
+    padding-left: 10px;
+    padding-bottom: 35px;
+    margin-bottom: 60px;
+    font-size: 35pt;
+    align-items: flex-end;
+    justify-content: left;
+}
+
+main{
+    width:600px;
 }
 
 img{
@@ -17,18 +34,34 @@ img{
     height:40px;
 }
 
-div.item{
-border:1px solid white;    width:100px;
-    height:100px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
+div.cell{
+    width:120px;
+    height:150px;
 }
 
-div.item div {
-    justify-content: center;
-    align-items: center;
-    display: flex;
+
+div.cell div { /* 마우스 커서 hover 시 배경색이 바뀌는 영역. 안에 img 노드, 텍스트 노드가 들어있다. */
+    width: 110px;
+    height: 100px;
     flex-direction: column;
-    width:60px;
+    position: relative;
 }
+
+div.cell div:hover{
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.arrow_box {
+    display: none;
+    position: absolute;
+    top: 50px;
+    width: 100px;
+    padding: 5px;
+    z-index:10000;
+    background: #eee;
+  }
+  
+  div:hover > p.arrow_box {
+    display: block;
+  }

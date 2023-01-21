@@ -4,7 +4,7 @@ body, main, div, h1 {
     display: flex;
     flex-wrap:wrap;
     text-align: center;
-    font-size: 11pt;
+    font-size: 11pt; /* 한줄에 열 글자면 11pt여야 한 줄에 다 들어감. 글씨 크기 키우고 싶으면 열글자에서 더 줄여야. */
 }
 
 body {
@@ -60,8 +60,18 @@ div.cell div:hover{
     padding: 5px;
     z-index:10000;
     background: #eee;
-  }
+}
   
-  div:hover > p.arrow_box {
+div:hover > p.arrow_box {
     display: block;
-  }
+}
+
+
+button {
+    height: 40px;
+    width: 40px;
+    border: 0px;
+    background-color: #444;
+    color: white;
+    font-size: 12pt;
+}

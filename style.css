@@ -255,3 +255,8 @@ iframe {
 .widen {
     height: 200px;
 }
+
+.numbers {
+    font-size: 8pt;
+    color: #888
+}

@@ -106,7 +106,7 @@ class Main{
                 this.folder_list_obj.classList.add("hide");
             this.weather_info_obj.classList.remove("hide");
             var now = new Date();
-            this.weather_info_obj.querySelector("span").innerText = `${now.getHours()}:${now.getMinutes()}`;
+            this.weather_info_obj.querySelector("span").innerText = `${now.getHours()}:${("0" + now.getMinutes()).slice(-2)}`;
         }
     }
 

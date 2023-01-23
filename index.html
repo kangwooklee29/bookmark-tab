@@ -3,11 +3,32 @@
   <title>새 탭</title>
   <meta charset="utf-8">
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
 </head>
 <body>
-  <h1>Your Bookmarks</h1>
+  <h1>Bookmarks</h1>
+  <div class="folder_list"></div>
+  <div class="weather_info"><span></span><iframe src="http://www.weather.go.kr/weather/special/api/iframe/dfs.jsp?myPointCode=5011061000&showVsrt=N&showSrt=Y&showMidterm=N" scrolling="no"></iframe></div>
   <main>
   </main>
+  <div id="overlay"></div>
+  <div class="mod_box">
+    <h2 class="new"><span class="new_bookmark">새 북마크</span> <span >/</span> <span class="new_folder">새 폴더</span></h2>
+    <h2 class="mod">수정</h2>
+    <div class="label">이름</div>
+    <div class="input"><input type="text" class="name"></div>
+    <div class="url">
+      <div class="label">URL</div>
+      <div class="input"><input type="text" class="url"></div>
+    </div>
+    <div class="buttons">
+      <div>
+      <button class="delete">삭제</button>
+      <button class="cancel">취소</button>
+      <button class="confirm">확인</button>
+    </div>
+    </div>
+  </div>
   <script src="background.js"></script>
 </body>
 </html>

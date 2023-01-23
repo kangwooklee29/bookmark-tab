@@ -199,9 +199,9 @@ class FolderIcon {
     {
         return new Promise((resolve, reject) => {
             chrome.bookmarks.getChildren(this.id, (b)=>{
-                var numbers = ` (${b.length})`;
-                var title = (this.title + numbers).length > 10 ? this.title.substring(0,7 - numbers.length) + "..." + numbers: this.title + numbers;
-                resolve(`<div id="${this.id}" draggable="true"><p class="mod_button">=</p><button class="folder_deco"></button><button class="folder"></button><span style="padding:12px;">&nbsp;</span><br>${title}<p class="arrow_box">${this.title}</p></div>`);
+                var numbers = `(${b.length})`;
+                var title = (this.title + numbers).length > 10 ? this.title.substring(0,7 - numbers.length) + "...": this.title;
+                resolve(`<div id="${this.id}" draggable="true"><p class="mod_button">=</p><button class="folder_deco"></button><button class="folder"></button><span style="padding:12px;">&nbsp;</span><br><span>${title} <font class="numbers">${numbers}</font></span><p class="arrow_box">${this.title}</p></div>`);
             });
         })
     }

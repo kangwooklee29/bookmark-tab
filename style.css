@@ -5,7 +5,10 @@ body, main, div, h1 {
     flex-wrap:wrap;
     text-align: center;
     font-size: 11pt; /* 한줄에 열 글자면 11pt여야 한 줄에 다 들어감. 글씨 크기 키우고 싶으면 열글자에서 더 줄여야. */
+    cursor: default;
+    color: #555;
 }
+
 
 body {
     flex-direction: column;
@@ -19,11 +22,24 @@ h1{
     width: 600px;
     padding-left: 10px;
     padding-bottom: 35px;
-    margin-bottom: 60px;
     font-size: 35pt;
     align-items: flex-end;
     justify-content: left;
 }
+
+
+div.folder_list {
+    color: #777;
+    width: 600px;
+    padding-bottom: 30px;
+   justify-content: left;  
+}
+
+div.folder_list span{
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
 
 main{
     width:600px;
@@ -42,7 +58,7 @@ div.cell{
 
 div.cell div { /* 마우스 커서 hover 시 배경색이 바뀌는 영역. 안에 img 노드, 텍스트 노드가 들어있다. */
     width: 110px;
-    height: 100px;
+    height: 110px;
     flex-direction: column;
     position: relative;
 }
@@ -52,10 +68,30 @@ div.cell div:hover{
     cursor: pointer;
 }
 
+.mod_button {
+    display: none;
+    font-size:5pt;
+    position: absolute;
+    top:-2px;
+    right: 5px;
+    width:15px;
+    height:15px;
+    color:#777;
+}
+
+div:hover > p.mod_button {
+    display: block;
+}
+
+
+.mod_button:hover {
+    background-color: #fafafa;
+}
+
 .arrow_box {
     display: none;
     position: absolute;
-    top: 50px;
+    top: 55px;
     width: 100px;
     padding: 5px;
     z-index:10000;
@@ -67,11 +103,155 @@ div:hover > p.arrow_box {
 }
 
 
-button {
+div.cell button.icon {
     height: 40px;
     width: 40px;
     border: 0px;
     background-color: #444;
     color: white;
     font-size: 12pt;
+}
+
+
+
+.mod_box {
+    position: fixed;
+    height: 300px;
+    width: 500px;
+    background-color: white;
+    z-index: 1000000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%); 
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 900000;
+}
+
+.hide {
+    display:none;
+}
+
+
+.mod_box > h2, div {
+    width: 100%;
+    margin: 0px;
+}
+
+.mod_box h2 {
+    text-align: left;
+    padding-left: 20px;
+    font-weight: normal;
+    height: 30px;
+    padding-top: 10px;
+}
+
+.mod_box div.label {
+    height: 20px;
+    justify-content: left;
+    padding-left: 40px;
+    padding-top: 10px;
+}
+
+.mod_box div.input {
+    height: 40px;
+    padding-top: 2px;
+}
+
+.mod_box div.buttons div {
+    position: relative;
+    height: 60px;
+}
+
+.mod_box input {
+    height: 20px;
+    width: 400px;
+    border: 0px;
+    background-color: #e0e0e0;
+}
+
+.mod_box button {
+    position: absolute;
+    width: 65px;
+    height: 35px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.mod_box .delete {
+    left: 0px;
+    color: red;
+    border: 1px solid red;
+    background-color: white;   
+}
+
+.mod_box .cancel {
+    right: 100px;
+}
+
+.mod_box .confirm {
+    right: 0px;
+}
+
+
+
+button.folder_deco{
+    position: absolute;
+    width: 10px;
+    height: 5px;
+    top:18px;
+    left:40px;
+    background-color: #999;
+    border: 0px;
+    border-radius: 10px;
+}
+
+button.folder{
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    position: absolute;
+    width: 40px;
+    height: 33px;
+    top:20px;
+    background-color: #ccc;
+}
+
+
+.visibility_hide{
+    visibility: hidden;
+}
+
+h2.new {
+    color: #ccc;
+}
+
+.clicked {
+    color: #555;
+}
+
+.folder_selected {
+    border: 1px solid black;
+}
+
+
+.weather_info {
+    width: 300px;
+    height: 160px;
+    padding-bottom: 70px;
+}
+
+iframe {
+    border: 0px;
+    height: 100%;
+}
+
+.widen {
+    height: 200px;
 }

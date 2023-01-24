@@ -206,17 +206,18 @@ class Icon {
     }
 }
 
+
 class FolderIcon {
     constructor(e)
     {
         this.id = e.id;
         this.title = e.title;
-        this.innerHTML = "";
     }
 
     async get_innerHTML()
     {
         return new Promise((resolve, reject) => {
+            console.log(this);
             chrome.bookmarks.getChildren(this.id, (b)=>{
                 var numbers = `(${b.length})`;
                 var title = (this.title + numbers).length > 10 ? this.title.substring(0,7 - numbers.length) + "...": this.title;
@@ -228,7 +229,7 @@ class FolderIcon {
 
 
 
-var now_dragging = null, start_pos = null, folder_selected = null, dragleave = null;
+var now_dragging = null, start_pos = null, folder_selected = null, dragleave = null, didnleave = null;
 
 document.body.addEventListener("dragstart", (e) =>{
     if (e.target.nodeName === "DIV" && "id" in e.target && e.target.id !== "")
@@ -252,6 +253,13 @@ document.body.addEventListener("dragover", (e)=> {
 
 
 document.body.addEventListener("dragenter", (e) => {
+
+    var node = e.target;
+    while (node && node.nodeName !== "DIV")
+        node = node.parentNode;
+    if (node && node === folder_selected)
+        didnleave = folder_selected;
+
     if (e.target.nodeName === "DIV" && e.target.id !== "")
     {
         if (folder_selected) folder_selected.classList.remove("folder_selected");
@@ -278,6 +286,7 @@ document.body.addEventListener("dragenter", (e) => {
         else
         {
             folder_selected = e.target;
+            dragleave = null;
             if (e.target.classList.contains("folder_selected") === false) e.target.classList.add("folder_selected");
         }
     }
@@ -290,20 +299,27 @@ document.body.addEventListener("dragenter", (e) => {
     }
 });
 
-document.body.addEventListener("dragleave", (e) => { 
-    if (e.target.classList.contains("folder_selected")) dragleave = e.target;
+document.body.addEventListener("dragleave", (e) => {
+    if (e.target.classList.contains("folder_selected") && didnleave !== e.target) dragleave = e.target;
 });
 
-document.body.addEventListener("dragend", (e) => {
+document.body.addEventListener("dragend", async (e) => {
     e.target.style.opacity = 1;
     if (folder_selected && now_dragging !== null)
     {
         folder_selected.classList.remove("folder_selected");
         if (main.folder_id !== folder_selected.id && e.target.id !== folder_selected.id && folder_selected !== dragleave)
         {
-            console.log(dragleave);
             chrome.bookmarks.move(e.target.id, {parentId: folder_selected.id});
             main.$target.removeChild(e.target.parentNode);
+
+            console.log(folder_selected);
+            if (folder_selected.querySelector("span"))
+            {
+                var icon = new FolderIcon({id:folder_selected.id, title:folder_selected.querySelectorAll("span")[1].innerText.split(" (")[0]});
+                if (folder_selected.id in main.cells)
+                    main.cells[folder_selected.id].put_innerHTML(await icon.get_innerHTML());
+            }
         }
         else
         {

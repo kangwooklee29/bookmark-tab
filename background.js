@@ -1,6 +1,5 @@
 document.body.addEventListener("click", (e)=>
 {
-    console.log(e.target);
     if (e.target.nodeName === "SPAN" && e.target.parentNode.classList.contains("weather_info"))
     {
         var target = document.querySelector("iframe");
@@ -349,6 +348,7 @@ class ModBox
 
     save_and_close()
     {
+        if (this.$target.classList.contains("hide")) return;
         if (this.name_obj.value === "" || (this.url_obj.value !== null && this.url_obj.value === "https://"))
         {
             alert("Input Error!");

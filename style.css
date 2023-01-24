@@ -251,9 +251,10 @@ iframe {
     border: 0px;
     height: 100%;
 }
-
 .widen {
-    height: 200px;
+    height: 260px;
+    z-index: 1000000;
+    background-color: white;
 }
 
 .numbers {

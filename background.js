@@ -162,19 +162,39 @@ class Cell{
     }
 }
 
+function img_onload(e)
+{
+    var url = `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${(new URL(e.target.id)).hostname}&size=64`;
+    var hostname_split = (new URL(e.target.id)).hostname.split(".");
+    var new_hostname = "";
+    if (hostname_split[hostname_split.length-2].length <= 3)
+        new_hostname = hostname_split.slice(-3).join(".");
+    else
+        new_hostname = hostname_split.slice(-2).join(".");
+    var new_url = `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${new_hostname}&size=64`; 
+
+    if (e.target.width === 16)
+    {
+        if (e.target.src === url)
+        {
+            e.target.src = new_url;
+            document.querySelector(`a[href='${e.target.id}']`).innerHTML = `<img src="${new_url}" draggable="false">`; 
+        }
+        else
+            document.querySelector(`a[href='${e.target.id}']`).innerHTML = `<button class="icon">${e.target.alt}</button>`;
+    }    
+}
+
 class Icon {
     constructor(e)
     {
-        var url = `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${ (new URL(e.url)).hostname}&size=64`;
+        var url = `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${(new URL(e.url)).hostname}&size=64`;
         // 구글이 소셜앱에서 favicon 구해오는 히든 api를 사용. 
         main.img_dict[url] = new Image();
         main.img_dict[url].src = url;
         main.img_dict[url].id = e.url;
         main.img_dict[url].alt = e.title.substring(0,2);
-        main.img_dict[url].onload = (e) => {
-            if (e.target.width === 16)
-                document.querySelector(`a[href='${e.target.id}']`).innerHTML = `<button class="icon">${e.target.alt}</button>`;
-        }
+        main.img_dict[url].onload = (e) => {img_onload(e);}
 
         this.id = e.id;
         var title = e.title.length > 10 ? e.title.substring(0,7) + "..." : e.title;

@@ -197,7 +197,7 @@ class Icon {
 
         this.id = e.id;
         var title = e.title.length > 10 ? e.title.substring(0,7) + "..." : e.title;
-        this.innerHTML = `<div id="${e.id}" draggable="true"><p class="mod_button">=</p><a href="${e.url}" draggable="false"><img src="${url}" draggable="false"></a><br>${title}<p class="arrow_box">${e.title}</p></div>`;
+        this.innerHTML = `<div id="${e.id}" draggable="true"><p class="mod_button">=</p><a href="${e.url}" draggable="false"><img src="${url}" draggable="false"></a><br><p class="icon_title">${title}</p><p class="arrow_box">${e.title}</p></div>`;
     }
 
     async get_innerHTML()
@@ -221,7 +221,7 @@ class FolderIcon {
             chrome.bookmarks.getChildren(this.id, (b)=>{
                 var numbers = `(${b.length})`;
                 var title = (this.title + numbers).length > 10 ? this.title.substring(0,7 - numbers.length) + "...": this.title;
-                resolve(`<div id="${this.id}" draggable="true"><p class="mod_button">=</p><button class="folder_deco"></button><button class="folder"></button><span style="padding:12px;">&nbsp;</span><br><span>${title} <font class="numbers">${numbers}</font></span><p class="arrow_box">${this.title}</p></div>`);
+                resolve(`<div id="${this.id}" draggable="true"><p class="mod_button">=</p><button class="folder_deco"></button><button class="folder"></button><span style="padding:12px;">&nbsp;</span><br><p class="icon_title">${title} <font class="numbers">${numbers}</font></p><p class="arrow_box">${this.title}</p></div>`);
             });
         })
     }

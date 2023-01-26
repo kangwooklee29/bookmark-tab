@@ -102,6 +102,13 @@ div:hover > p.arrow_box {
     display: block;
 }
 
+p.icon_title{
+    position: absolute;
+    top: 55px;
+    padding: 5px;
+}
+
+
 
 div.cell button.icon {
     height: 40px;
@@ -251,6 +258,7 @@ iframe {
     border: 0px;
     height: 100%;
 }
+
 .widen {
     height: 260px;
     z-index: 1000000;

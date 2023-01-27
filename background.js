@@ -365,6 +365,7 @@ class ModBox
         this.url_div_obj = $target.querySelector("div.url");
         this.new_bookmark_obj = $target.querySelector("span.new_bookmark");
         this.new_folder_obj = $target.querySelector("span.new_folder");
+        this.memo_obj = $target.querySelector("input.memo");
         this.close_mod_box();
         this.elem = null;
     }
@@ -426,6 +427,7 @@ class ModBox
         this.new_head_obj.classList.remove("hide");
         this.name_obj.value = "";
         this.url_obj.value = "https://";
+        this.memo_obj.value = "";
         this.elem = null;
     }
 
@@ -452,6 +454,7 @@ class ModBox
         this.mod_head_obj.classList.remove("hide");
         this.del_obj.classList.remove("hide");
         this.name_obj.value = elem.title;
+        if (elem.id in main.memos) this.memo_obj.value = main.memos[elem.id];
         if ("url" in elem)
         {
             this.url_div_obj.classList.remove("visibility_hide");

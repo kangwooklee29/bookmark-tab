@@ -74,7 +74,12 @@ class Main{
         this.img_dict = {};
         this.folder_stack = [];
         this.folder_id = "";
-        this.move_folder("1");
+        this.memos = {};
+        chrome.storage.sync.get(null, (items) => {
+            if ("memos" in items)
+                this.memos = JSON.parse(items.memos);
+            this.move_folder("1");
+        });
     }
 
     put(cell, id)
@@ -197,6 +202,7 @@ class Icon {
 
         this.id = e.id;
         var title = e.title.length > 10 ? e.title.substring(0,7) + "..." : e.title;
+        e.title += e.id in main.memos ? "<br>" + main.memos[e.id] : "";
         this.innerHTML = `<div id="${e.id}" draggable="true"><p class="mod_button">=</p><a href="${e.url}" draggable="false"><img src="${url}" draggable="false"></a><br><p class="icon_title">${title}</p><p class="arrow_box">${e.title}</p></div>`;
     }
 
@@ -221,6 +227,7 @@ class FolderIcon {
             chrome.bookmarks.getChildren(this.id, (b)=>{
                 var numbers = `(${b.length})`;
                 var title = (this.title + numbers).length > 10 ? this.title.substring(0,7 - numbers.length) + "...": this.title;
+                this.title += this.id in main.memos ? "<br>" + main.memos[this.id] : "";
                 resolve(`<div id="${this.id}" draggable="true"><p class="mod_button">=</p><button class="folder_deco"></button><button class="folder"></button><span style="padding:12px;">&nbsp;</span><br><p class="icon_title">${title} <font class="numbers">${numbers}</font></p><p class="arrow_box">${this.title}</p></div>`);
             });
         })

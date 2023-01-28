@@ -78,6 +78,8 @@ class Main{
         chrome.storage.sync.get(null, (items) => {
             if ("memos" in items)
                 this.memos = JSON.parse(items.memos);
+            if ("weather_url" in items)
+                this.weather_info_obj.querySelector("iframe").src = items.weather_url;
             this.move_folder("1");
         });
     }
@@ -151,6 +153,7 @@ class Main{
                 this.put(new Cell(), "blank");
         });        
     }
+
 }
 
 class Cell{
@@ -223,7 +226,6 @@ class FolderIcon {
     async get_innerHTML()
     {
         return new Promise((resolve, reject) => {
-            console.log(this);
             chrome.bookmarks.getChildren(this.id, (b)=>{
                 var numbers = `(${b.length})`;
                 var title = (this.title + numbers).length > 10 ? this.title.substring(0,7 - numbers.length) + "...": this.title;
@@ -388,6 +390,8 @@ class ModBox
                 chrome.bookmarks.create({'parentId':  main.folder_id, 'title': this.name_obj.value, 'url': this.url_obj.value});
             chrome.bookmarks.getChildren(main.folder_id, async (bookmarks) => {
                 var b = bookmarks[bookmarks.length-1];
+                main.memos[b.id] = this.memo_obj.value;
+                chrome.storage.sync.set({memos: JSON.stringify(main.memos)});
                 var cell = new Cell();
                 var icon = ('url' in b) ? new Icon(b) : new FolderIcon(b);
                 cell.put_innerHTML(await icon.get_innerHTML());
@@ -398,6 +402,8 @@ class ModBox
         else
         {
             chrome.bookmarks.update(this.elem.id, {'title': this.name_obj.value, 'url': this.url_obj.value});
+            main.memos[this.elem.id] = this.memo_obj.value;
+            chrome.storage.sync.set({memos: JSON.stringify(main.memos)});
             chrome.bookmarks.get(this.elem.id, async (e) => { 
                 var icon = "url" in e[0] ? new Icon(e[0]) : new FolderIcon(e[0]);
                 main.cells[e[0].id].put_innerHTML(await icon.get_innerHTML());
@@ -434,7 +440,7 @@ class ModBox
     show_new_bookmark()
     {
         if (this.new_bookmark_obj.classList.contains("clicked") === false) this.new_bookmark_obj.classList.add("clicked");
-        this.url_div_obj.classList.remove("visibility_hide");
+        this.url_div_obj.classList.remove("hide");
         this.new_folder_obj.classList.remove("clicked");
         this.url_obj.value = "https://";
     }
@@ -442,7 +448,7 @@ class ModBox
     show_new_folder()
     {
         if (this.new_folder_obj.classList.contains("clicked") === false) this.new_folder_obj.classList.add("clicked");
-        if (this.url_div_obj.classList.contains("visibility_hide") === false) this.url_div_obj.classList.add("visibility_hide");
+        if (this.url_div_obj.classList.contains("hide") === false) this.url_div_obj.classList.add("hide");
         this.new_bookmark_obj.classList.remove("clicked");
         this.url_obj.value = null;
     }
@@ -457,12 +463,12 @@ class ModBox
         if (elem.id in main.memos) this.memo_obj.value = main.memos[elem.id];
         if ("url" in elem)
         {
-            this.url_div_obj.classList.remove("visibility_hide");
+            this.url_div_obj.classList.remove("hide");
             this.url_obj.value = elem.url;
         }
         else
         {
-            if (this.url_div_obj.classList.contains("visibility_hide") === false) this.url_div_obj.classList.add("visibility_hide");
+            if (this.url_div_obj.classList.contains("hide") === false) this.url_div_obj.classList.add("hide");
             this.url_obj.value = null;
         }
         this.elem = elem;

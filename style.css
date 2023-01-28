@@ -18,7 +18,7 @@ h1{
     border-bottom: 1px solid #ccc;
     font-weight: 200;
     color: #555;
-    height:150px;
+    height:100px;
     width: 600px;
     padding-left: 10px;
     padding-bottom: 35px;
@@ -249,20 +249,25 @@ h2.new {
 
 
 .weather_info {
-    width: 300px;
-    height: 160px;
-    padding-bottom: 70px;
+    width: 400px;
+    height: 200px;
+    margin: 0px;
+    padding: 0px;
+    position: relative;
 }
 
 iframe {
-    border: 0px;
     height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
 }
 
-.widen {
-    height: 260px;
-    z-index: 1000000;
-    background-color: white;
+.weather_info span {
+    position: absolute;
+    right: 0px;
+    top: 200px;
 }
 
 .numbers {

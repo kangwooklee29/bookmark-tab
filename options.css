@@ -1,0 +1,30 @@
+main, main * {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+main {
+    width: 100%;
+    flex-direction: column;
+}
+
+main > div, h1 {
+    width: 60%;
+}
+
+main > div {
+    min-height: 150px;
+}
+
+h1 {
+    height: 100px;
+}
+
+main label {
+    width: 30%;
+}
+
+main item {
+    width: 70%;
+}

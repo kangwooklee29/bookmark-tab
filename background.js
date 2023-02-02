@@ -322,10 +322,9 @@ document.body.addEventListener("dragend", async (e) => {
             chrome.bookmarks.move(e.target.id, {parentId: folder_selected.id});
             main.$target.removeChild(e.target.parentNode);
 
-            console.log(folder_selected);
-            if (folder_selected.querySelector("span"))
+            if (folder_selected.querySelector("button.folder"))
             {
-                var icon = new FolderIcon({id:folder_selected.id, title:folder_selected.querySelectorAll("span")[1].innerText.split(" (")[0]});
+                var icon = new FolderIcon({id:folder_selected.id, title:folder_selected.querySelectorAll("p")[1].innerText.split(" (")[0]});
                 if (folder_selected.id in main.cells)
                     main.cells[folder_selected.id].put_innerHTML(await icon.get_innerHTML());
             }

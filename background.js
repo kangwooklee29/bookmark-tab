@@ -35,7 +35,7 @@ document.body.addEventListener("click", (e)=>
         mod_box.save_and_close();
 
     if (e.target.nodeName === "P" && e.target.classList.contains("mod_button"))
-        chrome.bookmarks.get(e.target.parentNode.id, (e) => { mod_box.mod_box(e[0]); });
+        API.bookmarks.get(e.target.parentNode.id, (e) => { mod_box.mod_box(e[0]); });
 
     if (e.target.nodeName === "BUTTON" && e.target.classList.contains("delete"))
         mod_box.delete();
@@ -56,7 +56,7 @@ document.body.addEventListener("click", (e)=>
 async function get_folder(id)
 {
     return new Promise((resolve, reject) => {
-        chrome.bookmarks.get(id, (b) => {
+        API.bookmarks.get(id, (b) => {
             resolve(b[0]);
         })
     });    
@@ -75,12 +75,12 @@ class Main{
         this.folder_stack = [];
         this.folder_id = "";
         this.memos = {};
-        chrome.storage.sync.get(null, (items) => {
+        API.storage.sync.get(null, (items) => {
             if ("memos" in items)
                 this.memos = JSON.parse(items.memos);
             if ("weather_url" in items)
                 this.weather_info_obj.querySelector("iframe").src = items.weather_url;
-            this.move_folder("1");
+            this.move_folder(initial_folder_id);
         });
     }
 
@@ -100,7 +100,7 @@ class Main{
         this.cells = {};
         this.img_dict = {};
         this.$target.innerHTML = "";
-        if (this.folder_id !== "1")
+        if (this.folder_id !== initial_folder_id)
         {
             if (this.weather_info_obj.classList.contains("hide") === false)
                 this.weather_info_obj.classList.add("hide");
@@ -123,7 +123,7 @@ class Main{
         {
             var b = await get_folder(id);
             folder_stack.push(b);
-            if (b.id !== "1")
+            if (b.id !== initial_folder_id)
                 id = b.parentId;
             else break;
             cnt--;
@@ -137,12 +137,12 @@ class Main{
         this.folder_id = id;
         this.print_folder_list();
         this.clear_main();
-        chrome.bookmarks.getChildren(id, async (b)=>
+        API.bookmarks.getChildren(id, async (b)=>
         {
             for (var e of b)
             {
                 var cell = new Cell();
-                var icon  = ('url' in e) ? new Icon(e) : new FolderIcon(e);
+                var icon  = ('url' in e && e.url) ? new Icon(e) : new FolderIcon(e);
                 cell.put_innerHTML(await icon.get_innerHTML());
                 this.put(cell, icon.id);
             }
@@ -226,7 +226,7 @@ class FolderIcon {
     async get_innerHTML()
     {
         return new Promise((resolve, reject) => {
-            chrome.bookmarks.getChildren(this.id, (b)=>{
+            API.bookmarks.getChildren(this.id, (b)=>{
                 var numbers = `(${b.length})`;
                 var title = (this.title + numbers).length > 10 ? this.title.substring(0,7 - numbers.length) + "...": this.title;
                 this.title += this.id in main.memos ? "<br>" + main.memos[this.id] : "";
@@ -319,7 +319,7 @@ document.body.addEventListener("dragend", async (e) => {
         folder_selected.classList.remove("folder_selected");
         if (main.folder_id !== folder_selected.id && e.target.id !== folder_selected.id && folder_selected !== dragleave)
         {
-            chrome.bookmarks.move(e.target.id, {parentId: folder_selected.id});
+            API.bookmarks.move(e.target.id, {parentId: folder_selected.id});
             main.$target.removeChild(e.target.parentNode);
 
             if (folder_selected.querySelector("button.folder"))
@@ -332,7 +332,7 @@ document.body.addEventListener("dragend", async (e) => {
         else
         {
             now_dragging = start_pos < now_dragging ? now_dragging +1 : now_dragging;
-            chrome.bookmarks.move(e.target.id, {parentId: main.folder_id, index:now_dragging});
+            API.bookmarks.move(e.target.id, {parentId: main.folder_id, index:now_dragging});
         }
         folder_selected = null;
         dragleave = null;
@@ -340,7 +340,7 @@ document.body.addEventListener("dragend", async (e) => {
     else if (now_dragging !== null)
     {
         now_dragging = start_pos < now_dragging ? now_dragging +1 : now_dragging;
-        chrome.bookmarks.move(e.target.id, {parentId: main.folder_id, index:now_dragging});
+        API.bookmarks.move(e.target.id, {parentId: main.folder_id, index:now_dragging});
     }
     now_dragging = null;
     start_pos = null;
@@ -384,15 +384,15 @@ class ModBox
         if (this.elem === null)
         {
             if (this.url_obj.value === null)
-                chrome.bookmarks.create({'parentId':  main.folder_id, 'title': this.name_obj.value, 'folder': true});
+                API.bookmarks.create({'parentId':  main.folder_id, 'title': this.name_obj.value, 'folder': true});
             else
-                chrome.bookmarks.create({'parentId':  main.folder_id, 'title': this.name_obj.value, 'url': this.url_obj.value});
-            chrome.bookmarks.getChildren(main.folder_id, async (bookmarks) => {
+                API.bookmarks.create({'parentId':  main.folder_id, 'title': this.name_obj.value, 'url': this.url_obj.value});
+            API.bookmarks.getChildren(main.folder_id, async (bookmarks) => {
                 var b = bookmarks[bookmarks.length-1];
                 main.memos[b.id] = this.memo_obj.value;
-                chrome.storage.sync.set({memos: JSON.stringify(main.memos)});
+                API.storage.sync.set({memos: JSON.stringify(main.memos)});
                 var cell = new Cell();
-                var icon = ('url' in b) ? new Icon(b) : new FolderIcon(b);
+                var icon = ('url' in b && b.url) ? new Icon(b) : new FolderIcon(b);
                 cell.put_innerHTML(await icon.get_innerHTML());
                 main.cells[b.id] = cell;
                 main.insertBefore(cell.obj, main.plus_obj.obj);
@@ -400,11 +400,11 @@ class ModBox
         }
         else
         {
-            chrome.bookmarks.update(this.elem.id, {'title': this.name_obj.value, 'url': this.url_obj.value});
+            API.bookmarks.update(this.elem.id, {'title': this.name_obj.value, 'url': this.url_obj.value});
             main.memos[this.elem.id] = this.memo_obj.value;
-            chrome.storage.sync.set({memos: JSON.stringify(main.memos)});
-            chrome.bookmarks.get(this.elem.id, async (e) => { 
-                var icon = "url" in e[0] ? new Icon(e[0]) : new FolderIcon(e[0]);
+            API.storage.sync.set({memos: JSON.stringify(main.memos)});
+            API.bookmarks.get(this.elem.id, async (e) => { 
+                var icon = ("url" in e[0]  && e[0].url ) ? new Icon(e[0]) : new FolderIcon(e[0]);
                 main.cells[e[0].id].put_innerHTML(await icon.get_innerHTML());
             });
         }
@@ -413,7 +413,7 @@ class ModBox
     delete()
     {
         this.close_mod_box();
-        chrome.bookmarks.remove(this.elem.id);
+        API.bookmarks.remove(this.elem.id);
         main.$target.removeChild(main.cells[this.elem.id].obj);
     }
 
@@ -480,8 +480,8 @@ class ModBox
     }
 }
 
+let API = (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
+var initial_folder_id = (navigator.userAgent.indexOf("Firefox") != -1) ?"toolbar_____" : "1";
 var main = new Main(document.querySelector("main"));
 var mod_box = new ModBox(document.querySelector("div.mod_box"));
-
-
 

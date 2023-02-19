@@ -367,7 +367,6 @@ class ModBox
         this.new_bookmark_obj = $target.querySelector("span.new_bookmark");
         this.new_folder_obj = $target.querySelector("span.new_folder");
         this.memo_obj = $target.querySelector("input.memo");
-        this.close_mod_box();
         this.elem = null;
     }
 
@@ -419,8 +418,10 @@ class ModBox
 
     close_mod_box()
     {
-        this.$target.classList.add("hide");
-        this.overlay_obj.classList.add("hide");
+        if (this.$target.classList.contains("hide") === false)
+            this.$target.classList.add("hide");
+        if (this.overlay_obj.classList.contains("hide") === false)
+            this.overlay_obj.classList.add("hide");
     }
 
     new_mod_box()

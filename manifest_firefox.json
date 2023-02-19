@@ -8,8 +8,7 @@
     },
     "browser_specific_settings": {
       "gecko": {
-          "id": "id@lkwks.pe.kr",
-          "strict_min_version": "88.0"
+          "id": "test@gmail.com"
       }
     },    
     "permissions": ["bookmarks", "storage"],

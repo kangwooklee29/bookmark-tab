@@ -9,7 +9,7 @@ document.body.addEventListener("click", (e)=>
             target.classList.remove("widen");
     }
 
-    if (e.target.nodeName === "DIV" && e.target.id !== "")
+    if (e.target.nodeName === "DIV" && e.target.id !== "" && e.target.id !== "overlay")
     {
         if (e.target.querySelector("a"))
             window.location.href = e.target.querySelector("a").href;

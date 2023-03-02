@@ -382,14 +382,15 @@ class ModBox
         this.close_mod_box();
         if (this.elem === null)
         {
-            if (this.url_obj.value === null)
-                API.bookmarks.create({'parentId':  main.folder_id, 'title': this.name_obj.value, 'folder': true});
+            var new_icon = {'parentId':  main.folder_id, 'title': this.name_obj.value};
+            if (this.url_obj.value === null || this.url_obj.value === "")
+                new_icon['type'] = 'folder';
             else
-                API.bookmarks.create({'parentId':  main.folder_id, 'title': this.name_obj.value, 'url': this.url_obj.value});
-            API.bookmarks.getChildren(main.folder_id, async (bookmarks) => {
-                var b = bookmarks[bookmarks.length-1];
+                new_icon['url'] = this.url_obj.value;
+            API.bookmarks.create(new_icon, async (b) => {
                 main.memos[b.id] = this.memo_obj.value;
                 API.storage.sync.set({memos: JSON.stringify(main.memos)});
+        
                 var cell = new Cell();
                 var icon = ('url' in b && b.url) ? new Icon(b) : new FolderIcon(b);
                 cell.put_innerHTML(await icon.get_innerHTML());

@@ -2,15 +2,15 @@ let API =  (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 
 async function restoreOptions() {
     API.storage.sync.get(null, (items) => {
-        if (items.weather_url)
-            document.querySelector("#weather_url input").value = items.weather_url;
+        if (items.weather_api)
+            document.querySelector("#weather_api input").value = items.weather_api;
        
         document.querySelector("#restore_backup textarea").value = JSON.stringify(items);
     });
 
 
-    document.querySelector("#weather_url button").addEventListener("click", ()=>{
-        API.storage.sync.set({weather_url: document.querySelector("#weather_url input").value});
+    document.querySelector("#weather_api button").addEventListener("click", ()=>{
+        API.storage.sync.set({weather_api: document.querySelector("#weather_api input").value});
     });
 
 

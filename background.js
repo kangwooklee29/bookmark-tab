@@ -75,11 +75,10 @@ class Main{
         this.folder_stack = [];
         this.folder_id = "";
         this.memos = {};
+        this.weather_info_obj.querySelector("iframe").src = "weather.html";
         API.storage.sync.get(null, (items) => {
             if ("memos" in items)
                 this.memos = JSON.parse(items.memos);
-            if ("weather_url" in items)
-                this.weather_info_obj.querySelector("iframe").src = items.weather_url;
             this.move_folder(initial_folder_id);
         });
     }

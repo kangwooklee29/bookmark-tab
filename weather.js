@@ -1,21 +1,4 @@
-// Listen for a message from the background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'weatherData') {
-      // Save the weather data to localStorage
-      localStorage.setItem('weatherData', message.data);
-
-      // Update the new tab page
-      document.getElementById('weather').innerText = message.data;
-  }
-});
-
-// Initialize with data from localStorage if available
-const storedWeatherData = localStorage.getItem('weatherData');
-if (storedWeatherData) {
-  document.getElementById('weather').innerText = storedWeatherData;
-}
-
-let n = 10;
+let API =  (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 
 function get_time_num() {
     const nowDate = new Date();
@@ -80,97 +63,7 @@ function get_icon_str(nowDate, time, sky, pty) {
     }
 }
 
-async function update_weather(n) {
-    const nowDate = new Date();
-    const time_num = get_time_num();
-    let base_date = nowDate.toISOString().slice(0, 10).replace(/-/g, "");
-
-    const quotient = (nowDate.getHours() * 60 + nowDate.getMinutes() - 130);
-    if (quotient < 0) {
-      nowDate.setDate(nowDate.getDate() - 1);
-      base_date = nowDate.toISOString().slice(0, 10).replace(/-/g, "");
-    }
-
-    const base_time = new Date(time_num * 60 * 1000).toISOString().substr(11, 5).replace(":", "");
-
-    const params = new URLSearchParams({
-      serviceKey: localStorage.getItem("weather_api"),
-      pageNo: '1',
-      numOfRows: '1000',
-      dataType: 'JSON',
-      nx: '61',
-      ny: '126',
-      base_time: base_time,
-      base_date: base_date
-    });
-
-    const url = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?${params.toString()}`;
-
-    const response = await fetch(url);
-    const res_json = await response.json();
-    const weather_info = [];
-
-    if (res_json.response.header.resultCode === "00") {
-      let cnt = 0;
-      const sky = [], pty = [], tmp = [], pcp = [], sno = [], pop = [], time = [];
-      
-      for (const item of res_json.response.body.items.item) {
-        const icat = item.category;
-        const ival = item.fcstValue;
-        const itime = parseInt(item.fcstTime.slice(0, 2), 10);
-        if (itime % 3 !== 0) continue;
-        
-        if (icat === "PTY") {
-          if (cnt === n) break;
-          time.push(itime);
-          pty.push(ival);
-          cnt++;
-        }
-        if (icat === "SKY" && sky.length < n) sky.push(ival);
-        if (icat === "TMP" && tmp.length < n) tmp.push(ival);
-        if (icat === "PCP" && pcp.length < n) pcp.push(ival);
-        if (icat === "SNO" && sno.length < n) sno.push(ival);
-        if (icat === "POP" && pop.length < n) pop.push(ival);
-      }
-  
-      for (let i = 0; i < n; i++) {
-        let temp = get_number_str(pcp[i]);
-        if (temp !== "") {
-          pcp[i] = temp;
-        } else {
-          pcp[i] = get_number_str(sno[i]);
-        }
-        weather_info.push({
-          icon: `<img src="${get_icon_str(nowDate, time[i], sky[i], pty[i])}">`,
-          time: time[i],
-          tmp: tmp[i],
-          pcp: pcp[i],
-          pop: pop[i]
-        });
-      }
-    }
-
-    return weather_info;
-}
-
-async function run_weather() {
-    const savedWeatherInfo = JSON.parse(localStorage.getItem("weather_info")) || [];
-    const savedUpdateDate = localStorage.getItem("update_date") || "";
-    const savedTimeNum = localStorage.getItem("time_num") || "";
-    
-    const nowDate = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    let weatherInfo = [];
-    
-    if (!savedUpdateDate || savedTimeNum !== get_time_num() || savedUpdateDate !== nowDate) {
-      weatherInfo = await update_weather();
-      localStorage.setItem("update_date", nowDate);
-      localStorage.setItem("time_num", get_time_num());
-      localStorage.setItem("weather_info", JSON.stringify(weatherInfo));
-    } else {
-      weatherInfo = savedWeatherInfo;
-    }
-    
-
+async function run_weather(weatherInfo) {
     const table = document.getElementById('weatherTable');
 
     // Time row with 'sepa' class
@@ -213,4 +106,8 @@ async function run_weather() {
 
 }
 
-run_weather();
+API.storage.sync.get(['weather_info'], async (items) => {
+  if (items.weather_info) {
+    run_weather(JSON.parse(items.weather_info));
+  }
+});

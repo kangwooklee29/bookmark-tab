@@ -5,7 +5,9 @@
     "chrome_url_overrides" : {
         "newtab": "index.html"
       },
-    "permissions": ["bookmarks", "storage", "http://apis.data.go.kr/*"],
+    "permissions": ["bookmarks", "storage"],
     "options_page": "options.html",
-    "content_security_policy": "script-src 'self' http://apis.data.go.kr; object-src 'self'"
+    "background": {
+      "service_worker": "weather_background.js"
+    }
 }

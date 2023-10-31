@@ -1,3 +1,20 @@
+// Listen for a message from the background script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'weatherData') {
+      // Save the weather data to localStorage
+      localStorage.setItem('weatherData', message.data);
+
+      // Update the new tab page
+      document.getElementById('weather').innerText = message.data;
+  }
+});
+
+// Initialize with data from localStorage if available
+const storedWeatherData = localStorage.getItem('weatherData');
+if (storedWeatherData) {
+  document.getElementById('weather').innerText = storedWeatherData;
+}
+
 let n = 10;
 
 function get_time_num() {
@@ -22,16 +39,16 @@ function get_number_str(encoded_str) {
 }
 
 function day_icon_src(sky) {
-    if (sky <= 5) return "sun.png";
-    if (sky <= 8) return "sun_and_cloud.png";
-    return "day_cloud.png";
+    if (sky <= 5) return "assets/sun.png";
+    if (sky <= 8) return "assets/sun_and_cloud.png";
+    return "assets/day_cloud.png";
 }
 
 function night_icon_src(sky) {
     const lunar_day = get_lunar_day();
-    if (sky <= 5) return (lunar_day >= 12 && lunar_day <= 18) ? "full_moon.png" : "moon.png";
-    if (sky <= 8) return "moon_and_cloud.png";
-    return "night_cloud.png";
+    if (sky <= 5) return (lunar_day >= 12 && lunar_day <= 18) ? "assets/full_moon.png" : "assets/moon.png";
+    if (sky <= 8) return "assets/moon_and_cloud.png";
+    return "assets/night_cloud.png";
 }
 
 function sun_rises_at_6(nowDate) {
@@ -48,10 +65,10 @@ function sun_rises_at_18(nowDate) {
 
 function get_icon_str(nowDate, time, sky, pty) {
     const icon_src = {
-        "1": "rain.png",
-        "2": "rain_and_snow.png",
-        "3": "snow.png",
-        "4": "rain.png"
+        "1": "assets/rain.png",
+        "2": "assets/rain_and_snow.png",
+        "3": "assets/snow.png",
+        "4": "assets/rain.png"
     };
     if (pty === "0") {
         if (time <= 3 || time >= 21) return night_icon_src(sky);
@@ -65,7 +82,7 @@ function get_icon_str(nowDate, time, sky, pty) {
 
 async function update_weather(n) {
     const nowDate = new Date();
-    const time_num = await get_time_num();
+    const time_num = get_time_num();
     let base_date = nowDate.toISOString().slice(0, 10).replace(/-/g, "");
 
     const quotient = (nowDate.getHours() * 60 + nowDate.getMinutes() - 130);

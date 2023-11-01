@@ -147,8 +147,10 @@ async function update_weather(weather_api, n) {
 
 function fetchWeatherData() {
     API.storage.sync.get(null, async (items) => {
-        if (items.weather_api) {
+        const currentDatetime = new Date().toISOString().slice(0, 13).replace('T', ' ');
+        if (items.weather_api && (!items.weather_info_datetime || items.weather_info_datetime !== currentDatetime)) {
             update_weather(items.weather_api, n);
+            chrome.storage.sync.set({ weather_info_datetime: currentDatetime });
         }
     });
 }

@@ -185,6 +185,7 @@ function img_onload(e)
         {
             e.target.src = new_url;
             document.querySelector(`a[href='${e.target.id}']`).innerHTML = `<img src="${new_url}" draggable="false">`; 
+            e.target.onload = null;
         }
         else
             document.querySelector(`a[href='${e.target.id}']`).innerHTML = `<button class="icon">${e.target.alt}</button>`;

@@ -5,7 +5,7 @@
     "chrome_url_overrides" : {
         "newtab": "index.html"
       },
-    "permissions": ["bookmarks", "storage"],
+    "permissions": ["bookmarks", "storage", "alarms"],
     "options_page": "options.html",
     "background": {
       "service_worker": "weather_background.js"

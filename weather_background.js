@@ -152,11 +152,11 @@ async function update_weather(weather_api, n) {
     API.storage.sync.set({weather_info: weather_info});
 }
 
-function fetchWeatherData() {
+async function fetchWeatherData() {
     API.storage.sync.get(null, async (items) => {
         const currentDatetime = new Date().toISOString().slice(0, 13).replace('T', ' ');
         if (items.weather_api && (!items.weather_info_datetime || items.weather_info_datetime !== currentDatetime)) {
-            update_weather(items.weather_api, n);
+            await update_weather(items.weather_api, n);
             API.storage.sync.set({ weather_info_datetime: currentDatetime });
         } else {
           console.log(`tried to update weather info but didn't because the latest update time ${items.weather_info_datetime} is the same as the current time ${currentDatetime}.`);

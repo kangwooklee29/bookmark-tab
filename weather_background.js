@@ -4,8 +4,15 @@ let n = 10;
 // Fetch weather data when the service worker starts
 fetchWeatherData();
 
-// Fetch weather data every hour
-setInterval(fetchWeatherData, 1000 * 60 * 60);
+// 알람 생성
+API.alarms.create("hourlyAlarm", { periodInMinutes: 60 });
+
+// 알람 리스너
+API.alarms.onAlarm.addListener(function(alarm) {
+  if(alarm.name === "hourlyAlarm") {
+    fetchWeatherData();
+  }
+});
 
 function get_number_str(encoded_str) {
   return /\d/.test(encoded_str) ? encoded_str : "-";
@@ -150,7 +157,9 @@ function fetchWeatherData() {
         const currentDatetime = new Date().toISOString().slice(0, 13).replace('T', ' ');
         if (items.weather_api && (!items.weather_info_datetime || items.weather_info_datetime !== currentDatetime)) {
             update_weather(items.weather_api, n);
-            chrome.storage.sync.set({ weather_info_datetime: currentDatetime });
+            API.storage.sync.set({ weather_info_datetime: currentDatetime });
+        } else {
+          console.log(`tried to update weather info but didn't because the latest update time ${items.weather_info_datetime} is the same as the current time ${currentDatetime}.`);
         }
     });
 }

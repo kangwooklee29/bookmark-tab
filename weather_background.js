@@ -4,14 +4,17 @@ let n = 10;
 // Fetch weather data when the service worker starts
 fetchWeatherData();
 
-// 알람 생성
-API.alarms.create("hourlyAlarm", { periodInMinutes: 60 });
+chrome.runtime.onInstalled.addListener(() => {
+  // 브라우저가 시작될 때 실행될 알람을 설정합니다.
+  API.alarms.create("hourlyAlarm", { periodInMinutes: 60 });
 
-// 알람 리스너
-API.alarms.onAlarm.addListener(function(alarm) {
-  if(alarm.name === "hourlyAlarm") {
-    fetchWeatherData();
-  }
+  // 알람이 울릴 때마다 실행될 이벤트 리스너를 등록합니다.
+
+  API.alarms.onAlarm.addListener(function(alarm) {
+    if(alarm.name === "hourlyAlarm") {
+      fetchWeatherData();
+    }
+  });
 });
 
 function get_number_str(encoded_str) {
@@ -149,15 +152,16 @@ async function update_weather(weather_api, n) {
       console.log("successfully updated weather info!");
     }
 
-    API.storage.sync.set({weather_info: weather_info});
+    return weather_info;
 }
 
 async function fetchWeatherData() {
     API.storage.sync.get(null, async (items) => {
         const currentDatetime = new Date().toISOString().slice(0, 13).replace('T', ' ');
         if (items.weather_api && (!items.weather_info_datetime || items.weather_info_datetime !== currentDatetime)) {
-            await update_weather(items.weather_api, n);
-            API.storage.sync.set({ weather_info_datetime: currentDatetime });
+            const weather_info = await update_weather(items.weather_api, n);
+            console.log(weather_info);
+            API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: currentDatetime });
         } else {
           console.log(`tried to update weather info but didn't because the latest update time ${items.weather_info_datetime} is the same as the current time ${currentDatetime}.`);
         }

@@ -26,6 +26,13 @@ body {
     margin-top:50px;
 }  
 
+div > img {
+    margin-top:25px;
+    margin-right: 12px;
+    height: 25px;
+    width: 25px;
+}
+
 h1{
     font-weight: 200;
     color: #555;
@@ -38,7 +45,7 @@ h1{
     font-weight: 200;
     font-size: 12pt; 
     margin-top: 20px;
-    margin-left: 205px;
+    margin-left: 155px;
     padding: 5px;
     white-space: nowrap;
     vertical-align: middle;

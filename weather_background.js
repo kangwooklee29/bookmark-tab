@@ -51,24 +51,24 @@ function get_lunar_day() {
 }
 
 function day_icon_src(sky) {
-  if (sky <= 5) return "assets/sun.png";
-  if (sky <= 8) return "assets/sun_and_cloud.png";
-  return "assets/day_cloud.png";
+  if (sky <= 5) return "assets/sun.svg";
+  if (sky <= 8) return "assets/sun_and_cloud.svg";
+  return "assets/day_cloud.svg";
 }
 
 function night_icon_src(sky) {
   const lunar_day = get_lunar_day();
-  if (sky <= 5) return (lunar_day >= 12 && lunar_day <= 18) ? "assets/full_moon.png" : "assets/moon.png";
-  if (sky <= 8) return "assets/moon_and_cloud.png";
-  return "assets/night_cloud.png";
+  if (sky <= 5) return (lunar_day >= 12 && lunar_day <= 18) ? "assets/full_moon.svg" : "assets/moon.svg";
+  if (sky <= 8) return "assets/moon_and_cloud.svg";
+  return "assets/night_cloud.svg";
 }
 
 function get_icon_str(nowDate, time, sky, pty) {
   const icon_src = {
-      "1": "assets/rain.png",
-      "2": "assets/rain_and_snow.png",
-      "3": "assets/snow.png",
-      "4": "assets/rain.png"
+      "1": "assets/rain.svg",
+      "2": "assets/rain_and_snow.svg",
+      "3": "assets/snow.svg",
+      "4": "assets/rain.svg"
   };
   if (pty === "0") {
       if (time <= 3 || time >= 21) return night_icon_src(sky);

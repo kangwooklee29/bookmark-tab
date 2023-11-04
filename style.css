@@ -14,19 +14,36 @@ body {
     flex-direction: column;
 }
 
-h1{
+.header-container {
+    justify-content: flex-start; 
+    text-align: left;
+    flex-wrap: nowrap; 
     border-bottom: 1px solid #ccc;
-    font-weight: 200;
-    color: #555;
+    padding-left: 10px;
     height:100px;
     width: 600px;
-    padding-left: 10px;
-    padding-bottom: 35px;
-    font-size: 35pt;
-    align-items: flex-end;
-    justify-content: left;
+    margin-bottom: 20px;
+    margin-top:50px;
+}  
+
+h1{
+    font-weight: 200;
+    color: #555;
+    font-size: 25pt;
+    letter-spacing: 3px;
+    margin-bottom: 0px;
 }
 
+.current-time {
+    font-weight: 200;
+    font-size: 12pt; 
+    margin-top: 20px;
+    margin-left: 205px;
+    padding: 5px;
+    white-space: nowrap;
+    vertical-align: middle;
+    font-style: italic;
+}
 
 div.folder_list {
     color: #777;
@@ -281,4 +298,12 @@ iframe {
 div.cell a {
     position: absolute;
     top: 20px;
+}
+
+div.logo {
+    position: absolute;
+    left: 20px;
+    top: 10px;
+    width: 40px;
+    height: 40px;
 }

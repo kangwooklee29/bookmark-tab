@@ -111,7 +111,6 @@ class Main{
                 this.folder_list_obj.classList.add("hide");
             this.weather_info_obj.classList.remove("hide");
             var now = new Date();
-            this.weather_info_obj.querySelector("span").innerText = `${now.getHours()}:${("0" + now.getMinutes()).slice(-2)}`;
         }
     }
 
@@ -487,3 +486,11 @@ var initial_folder_id = (navigator.userAgent.indexOf("Firefox") != -1) ?"toolbar
 var main = new Main(document.querySelector("main"));
 var mod_box = new ModBox(document.querySelector("div.mod_box"));
 
+document.querySelector('span.current-time').textContent = new Date().toLocaleString('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  

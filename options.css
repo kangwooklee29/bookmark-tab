@@ -36,3 +36,23 @@ main item {
 #weather_location select {
     width: 360px;
 }
+
+main.setup > h1{
+    display: none;
+}
+
+main.setup > div {
+    width: 100%;    
+}
+
+main.setup > #weather_visibility {
+    min-height: 20px;
+}
+
+main.setup > #weather_location select {
+    width: 250px;
+}
+
+main.loading {
+    background-color: gray;
+}

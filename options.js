@@ -66,6 +66,8 @@ async function restoreOptions() {
 
     document.querySelector('#weather_visibility_checkbox').addEventListener('change', (event) => {
         API.storage.sync.set({weather_visibility: event.target.checked});
+        if (is_setup_mode)
+            window.location.href = "";
     });
 
     document.querySelector("#weather_location input").addEventListener('input', () => {
@@ -93,13 +95,24 @@ async function restoreOptions() {
     });
 
     document.querySelector("#weather_location button").addEventListener("click", ()=>{
-        if (!cur_weather_location) return;
+        if (!cur_weather_location) alert("Select the appropriate address from the list below.");
         console.log(cur_weather_location);
         API.storage.sync.set(cur_weather_location, () => {
-            chrome.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
+            API.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
                 console.log("Response:", response);
             });
         });
+        if (is_setup_mode) {
+            document.querySelector("main").classList.add("loading");
+            const intervalId = setInterval(() => {
+                API.storage.sync.get(['weather_info'], (items) => {
+                    if (items.weather_info) {
+                        clearInterval(intervalId);
+                        window.location.href = "weather.html";
+                    }
+                });
+            }, 100);
+        }
     });
     
     document.querySelector("#restore_backup button").addEventListener("click", ()=>
@@ -107,7 +120,7 @@ async function restoreOptions() {
         try {
             API.storage.sync.set(JSON.parse(document.querySelector("#restore_backup textarea").value), ()=>{
                     window.location.href = window.location.href.split("?")[0];
-                    chrome.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
+                    API.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
                         console.log("Response:", response);
                     });            
             });
@@ -120,8 +133,12 @@ async function restoreOptions() {
 
 
 
-
-
+const params = new URLSearchParams(window.location.search);
+const is_setup_mode = params.get('mode') === "setup";
+if (is_setup_mode) {
+    document.querySelector("main").classList.add("setup");
+    document.querySelector("#weather_location input").size = 28;
+}
 
 document.addEventListener('DOMContentLoaded', async ()=> {
     const response = await fetch('assets/KMA_forecast_coordinates.csv');

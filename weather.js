@@ -44,5 +44,7 @@ async function run_weather(weatherInfo) {
 API.storage.sync.get(['weather_info'], async (items) => {
   if (items.weather_info) {
     run_weather(items.weather_info);
+  } else {
+    window.location.href = "options.html?mode=setup";
   }
 });

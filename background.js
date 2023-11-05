@@ -389,9 +389,7 @@ class ModBox
         if (this.elem === null)
         {
             var new_icon = {'parentId':  main.folder_id, 'title': this.name_obj.value};
-            if (this.url_obj.value === null || this.url_obj.value === "")
-                new_icon['type'] = 'folder';
-            else
+            if (this.url_obj.value)
                 new_icon['url'] = this.url_obj.value;
             API.bookmarks.create(new_icon, async (b) => {
                 main.memos[b.id] = this.memo_obj.value;

@@ -75,10 +75,17 @@ class Main{
         this.folder_stack = [];
         this.folder_id = "";
         this.memos = {};
-        this.weather_info_obj.querySelector("iframe").src = "weather.html";
+        this.weather_visibility = false;
         API.storage.sync.get(null, (items) => {
             if ("memos" in items)
                 this.memos = JSON.parse(items.memos);
+            if (!("weather_visibility" in items) || items.weather_visibility) {
+                this.weather_visibility = true;
+                API.storage.sync.set({weather_visibility: true});
+            }
+            if (this.weather_visibility)
+                this.weather_info_obj.querySelector("iframe").src = "weather.html";
+
             this.move_folder(initial_folder_id);
         });
     }

@@ -4,10 +4,14 @@ async function restoreOptions() {
     API.storage.sync.get(null, (items) => {
         if (items.weather_api)
             document.querySelector("#weather_api input").value = items.weather_api;
-       
+        if (items.weather_visibility)
+            document.querySelector('#weather_visibility_checkbox').checked = items.weather_visibility;
         document.querySelector("#restore_backup textarea").value = JSON.stringify(items);
     });
 
+    document.querySelector('#weather_visibility_checkbox').addEventListener('change', (event) => {
+        API.storage.sync.set({weather_visibility: event.target.checked});
+    });
 
     document.querySelector("#weather_api button").addEventListener("click", ()=>{
         API.storage.sync.set({weather_api: document.querySelector("#weather_api input").value});

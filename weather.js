@@ -31,7 +31,9 @@ async function run_weather(weatherInfo) {
       const row = document.createElement('tr');
       weatherInfo.forEach(info => {
         const cell = document.createElement('td');
-        cell.innerHTML = info[key];
+        cell.innerHTML = info[key].replace("mm", "㎜").replace("cm", "㎝");
+        if (key === "tmp") cell.innerHTML += "℃";
+        if (key === "pop") cell.innerHTML += "%";
         row.appendChild(cell);
       });
       table.appendChild(row);

@@ -4,6 +4,16 @@ let n = 10;
 // Fetch weather data when the service worker starts
 fetchWeatherData();
 
+API.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+      if (request.greeting === "fetchWeather") {
+          API.storage.sync.set({  weather_info_datetime: null }, () => { fetchWeatherData(); });
+          sendResponse({farewell: true});
+      }
+      return true;
+  }
+);
+
 API.runtime.onInstalled.addListener(() => {
   // 설치가 완료되었을 때 실행될 알람을 설정합니다.
   API.alarms.create("hourlyAlarm", { periodInMinutes: 60 });
@@ -97,6 +107,7 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
 
     const base_time = new Date(time_num * 60 * 1000).toISOString().substr(11, 5).replace(":", "");
 
+    if (!weather_nx || !weather_ny) return;
     console.log(weather_nx, weather_ny);
     const params = new URLSearchParams({
       serviceKey: weather_api,

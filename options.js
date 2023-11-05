@@ -50,8 +50,6 @@ kor,1111051500,서울특별시,종로구,청운효자동,60,127,126,58,14.35,37,
 
 async function restoreOptions() {
     API.storage.sync.get(null, (items) => {
-        if (items.weather_api)
-            document.querySelector("#weather_api input").value = items.weather_api;
         if (items.weather_visibility)
             document.querySelector('#weather_visibility_checkbox').checked = items.weather_visibility;
         if (items.weather_location_str) {
@@ -68,10 +66,6 @@ async function restoreOptions() {
 
     document.querySelector('#weather_visibility_checkbox').addEventListener('change', (event) => {
         API.storage.sync.set({weather_visibility: event.target.checked});
-    });
-
-    document.querySelector("#weather_api button").addEventListener("click", ()=>{
-        API.storage.sync.set({weather_api: document.querySelector("#weather_api input").value});
     });
 
     document.querySelector("#weather_location input").addEventListener('input', () => {
@@ -101,7 +95,11 @@ async function restoreOptions() {
     document.querySelector("#weather_location button").addEventListener("click", ()=>{
         if (!cur_weather_location) return;
         console.log(cur_weather_location);
-        API.storage.sync.set(cur_weather_location);
+        API.storage.sync.set(cur_weather_location, () => {
+            chrome.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
+                console.log("Response:", response);
+            });
+        });
     });
     
     document.querySelector("#restore_backup button").addEventListener("click", ()=>
@@ -109,7 +107,10 @@ async function restoreOptions() {
         try {
             API.storage.sync.set(JSON.parse(document.querySelector("#restore_backup textarea").value), ()=>{
                     window.location.href = window.location.href.split("?")[0];
-                });
+                    chrome.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
+                        console.log("Response:", response);
+                    });            
+            });
         }
         catch(e){
             console.log(e);

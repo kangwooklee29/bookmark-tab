@@ -1,6 +1,10 @@
 {
     "manifest_version": 3,
-    "name": "Bookmark Display on New Tab",
+    "name": "Bookmark Tab",
+    "description": "Displays your bookmarks in a neat layout on the new tab page.",
+    "icons": {
+      "256": "assets/logo.png"
+    },
     "version": "1.0",
     "chrome_url_overrides" : {
         "newtab": "index.html"

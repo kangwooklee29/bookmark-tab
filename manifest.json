@@ -11,6 +11,7 @@
       },
     "permissions": ["bookmarks", "storage", "alarms"],
     "options_page": "options.html",
+    "default_locale": "en",
     "background": {
       "service_worker": "weather_background.js"
     }

@@ -145,3 +145,9 @@ document.addEventListener('DOMContentLoaded', async ()=> {
     coordinates_data = await response.text();
     restoreOptions();
 });
+
+document.querySelector('#weather_visibility > label').textContent = chrome.i18n.getMessage("weather_visibility");
+document.querySelector('#weather_location > label').textContent = chrome.i18n.getMessage("weather_location");
+document.querySelector('#restore_backup > label').textContent = chrome.i18n.getMessage("restore_backup");
+document.querySelector('#weather_location button').textContent = chrome.i18n.getMessage("save");
+document.querySelector('#restore_backup button').textContent = chrome.i18n.getMessage("restore");

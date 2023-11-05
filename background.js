@@ -505,3 +505,15 @@ document.querySelector('span.current-time').textContent = new Date().toLocaleStr
     minute: '2-digit'
   });
   
+
+document.querySelector('title').textContent = chrome.i18n.getMessage("newtab_title");
+document.querySelector('.new_bookmark').textContent = chrome.i18n.getMessage("new_bookmark");
+document.querySelector('.new_folder').textContent = chrome.i18n.getMessage("new_folder");
+document.querySelector('.mod').textContent = chrome.i18n.getMessage("modify");
+document.querySelector('#name').textContent = chrome.i18n.getMessage("name");
+document.querySelector('.url > .label').textContent = chrome.i18n.getMessage("url");
+document.querySelector('#memo').textContent = chrome.i18n.getMessage("memo");
+document.querySelector('.delete').textContent = chrome.i18n.getMessage("delete");
+document.querySelector('.cancel').textContent = chrome.i18n.getMessage("cancel");
+document.querySelector('.confirm').textContent = chrome.i18n.getMessage("confirm");
+

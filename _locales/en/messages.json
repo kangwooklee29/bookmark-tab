@@ -1,0 +1,17 @@
+{
+    "newtab_title": "New Tab",
+    "new_bookmark": "New Bookmark",
+    "new_folder": "New Folder",
+    "modify": "Modify",
+    "name": "Name",
+    "url": "URL",
+    "memo": "Memo",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "weather_visibility": "Weather Visibility",
+    "weather_location": "Weather Location",
+    "save": "SAVE",
+    "restore": "RESTORE",
+    "restore_backup": "Restore Back-up"
+}

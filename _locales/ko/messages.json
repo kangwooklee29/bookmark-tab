@@ -1,0 +1,17 @@
+{
+    "newtab_title": "새 탭",
+    "new_bookmark": "새 북마크",
+    "new_folder": "새 폴더",
+    "modify": "수정",
+    "name": "이름",
+    "url": "URL",
+    "memo": "메모",
+    "delete": "삭제",
+    "cancel": "취소",
+    "confirm": "확인",
+    "weather_visibility": "날씨 보이기",
+    "weather_location": "현재 위치",
+    "save": "저장",
+    "restore": "복구",
+    "restore_backup": "복구 백업"
+}

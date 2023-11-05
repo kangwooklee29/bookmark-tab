@@ -28,3 +28,11 @@ main label {
 main item {
     width: 70%;
 }
+
+#weather_location item {
+    flex-direction: column;
+}
+
+#weather_location select {
+    width: 360px;
+}

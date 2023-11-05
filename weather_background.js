@@ -93,6 +93,7 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
 
     const base_time = new Date(time_num * 60 * 1000).toISOString().substr(11, 5).replace(":", "");
 
+    console.log(weather_nx, weather_ny);
     const params = new URLSearchParams({
       serviceKey: weather_api,
       pageNo: '1',

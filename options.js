@@ -26,8 +26,12 @@ kor,1111051500,서울특별시,종로구,청운효자동,60,127,126,58,14.35,37,
     */
     let data;
     if (!coordinates_data) {
+        console.log("starts to open the file");
         const response = await fetch('assets/KMA_forecast_coordinates.csv');
+        console.log("starts to parse the file");
         data = await response.text();
+        console.log("end of parsing");
+        coordinates_data = data;
     } else {
         data = coordinates_data;
     }
@@ -35,6 +39,7 @@ kor,1111051500,서울특별시,종로구,청운효자동,60,127,126,58,14.35,37,
     const lines = data.split('\n');
     const results = [];
   
+    console.log("starts to search...");
     for (const line of lines) {
         if (results.length >= 10) {
             results.push(['...', '...']);
@@ -49,6 +54,7 @@ kor,1111051500,서울특별시,종로구,청운효자동,60,127,126,58,14.35,37,
             results.push([locationString, gridValue]);
         }        
     }
+    console.log("end of search");
   
     return results;
 }
@@ -61,7 +67,7 @@ async function restoreOptions() {
             document.querySelector('#weather_visibility_checkbox').checked = items.weather_visibility;
         if (items.weather_location_str) {
             let option = document.createElement("option");
-            option.value = items.weather_location_str;
+            option.value = `${items.weather_nx}/${items.weather_ny}`;
             option.text = items.weather_location_str;
             cur_weather_location = {weather_location_str: items.weather_location_str, weather_nx: items.weather_nx, weather_ny: items.weather_ny};
             
@@ -80,6 +86,7 @@ async function restoreOptions() {
     });
 
     document.querySelector("#weather_location input").addEventListener('change', async () => {
+        document.querySelector("#weather_location_combo").innerHTML = "";
         weather_locations = await fetch_weather_locations(document.querySelector("#weather_location input").value);
         weather_locations.forEach((location_info) => {
             let option = document.createElement("option");
@@ -90,23 +97,24 @@ async function restoreOptions() {
     });
 
     document.querySelector("#weather_location_combo").addEventListener("change", (e) => {
-        if (e.target.text === "...") alert("Too many search results; Please use more specified keywords.");
+        if (e.target.value === "...") alert("Too many search results; Please use more specified keywords.");
         else {
-            const {nx, ny} = e.target.value.split("/");
-            cur_weather_location.weather_nx = nx;
-            cur_weather_location.weather_ny = ny;
+            const vals = e.target.value.split("/");
+            cur_weather_location.weather_location_str = e.target.textContent.trim();
+            cur_weather_location.weather_nx = vals[0];
+            cur_weather_location.weather_ny = vals[1];
         }
     });
 
     document.querySelector("#weather_location button").addEventListener("click", ()=>{
+        console.log(cur_weather_location);
         API.storage.sync.set(cur_weather_location);
     });
     
     document.querySelector("#restore_backup button").addEventListener("click", ()=>
     {
         try {
-            if (document.querySelector("#restore_backup textarea").value.length > 100)
-                API.storage.sync.set(JSON.parse(document.querySelector("#restore_backup textarea").value), ()=>{
+            API.storage.sync.set(JSON.parse(document.querySelector("#restore_backup textarea").value), ()=>{
                     window.location.href = window.location.href.split("?")[0];
                 });
         }
@@ -121,4 +129,6 @@ async function restoreOptions() {
 
 
 
-document.addEventListener('DOMContentLoaded', async()=>await restoreOptions());
+document.addEventListener('DOMContentLoaded', async ()=> {
+    restoreOptions();
+});

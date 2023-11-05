@@ -53,6 +53,6 @@ main.setup > #weather_location select {
     width: 250px;
 }
 
-main.loading {
-    background-color: gray;
+main.loading, main.loading * {
+    display: none;
 }

@@ -80,7 +80,7 @@ function get_icon_str(nowDate, time, sky, pty) {
   }
 }
 
-async function update_weather(weather_api, n) {
+async function update_weather(weather_api, n, weather_nx, weather_ny) {
     const nowDate = new Date();
     const time_num = get_time_num();
     let base_date = nowDate.toISOString().slice(0, 10).replace(/-/g, "");
@@ -98,8 +98,8 @@ async function update_weather(weather_api, n) {
       pageNo: '1',
       numOfRows: '1000',
       dataType: 'JSON',
-      nx: '61',
-      ny: '126',
+      nx: weather_nx,
+      ny: weather_ny,
       base_time: base_time,
       base_date: base_date
     });
@@ -159,7 +159,7 @@ async function fetchWeatherData() {
     API.storage.sync.get(null, async (items) => {
         const currentDatetime = new Date().toISOString().slice(0, 13).replace('T', ' ');
         if (items.weather_api && (!items.weather_info_datetime || items.weather_info_datetime !== currentDatetime)) {
-            const weather_info = await update_weather(items.weather_api, n);
+            const weather_info = await update_weather(items.weather_api, n, items.weather_nx, items.weather_ny);
             console.log(weather_info);
             API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: currentDatetime });
         } else {

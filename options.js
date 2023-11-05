@@ -151,3 +151,4 @@ document.querySelector('#weather_location > label').textContent = chrome.i18n.ge
 document.querySelector('#restore_backup > label').textContent = chrome.i18n.getMessage("restore_backup");
 document.querySelector('#weather_location button').textContent = chrome.i18n.getMessage("save");
 document.querySelector('#restore_backup button').textContent = chrome.i18n.getMessage("restore");
+document.querySelector('#weather_location input').placeholder = chrome.i18n.getMessage("address_placeholder");

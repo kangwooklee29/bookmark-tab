@@ -4,17 +4,21 @@ let n = 10;
 // Fetch weather data when the service worker starts
 fetchWeatherData();
 
-chrome.runtime.onInstalled.addListener(() => {
-  // 브라우저가 시작될 때 실행될 알람을 설정합니다.
+API.runtime.onInstalled.addListener(() => {
+  // 설치가 완료되었을 때 실행될 알람을 설정합니다.
   API.alarms.create("hourlyAlarm", { periodInMinutes: 60 });
 
   // 알람이 울릴 때마다 실행될 이벤트 리스너를 등록합니다.
-
   API.alarms.onAlarm.addListener(function(alarm) {
-    if(alarm.name === "hourlyAlarm") {
+    if (alarm.name === "hourlyAlarm") {
       fetchWeatherData();
     }
   });
+});
+
+API.runtime.onStartup.addListener(() => {
+  // 브라우저가 시작될 때 실행될 알람을 다시 확인하거나 설정합니다.
+  API.alarms.create("hourlyAlarm", { periodInMinutes: 60 });
 });
 
 function get_number_str(encoded_str) {
@@ -158,9 +162,17 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
 
 async function fetchWeatherData() {
     API.storage.sync.get(null, async (items) => {
+        let weather_api = null;
+        if (items.weather_api)
+          weather_api = items.weather_api;
+        else {
+          const response_weather_api_key = await fetch('weather_api_key.json');
+          const config = await response_weather_api_key.json();
+          weather_api = config.weather_api;
+        }
         const currentDatetime = new Date().toISOString().slice(0, 13).replace('T', ' ');
-        if (items.weather_api && (!items.weather_info_datetime || items.weather_info_datetime !== currentDatetime)) {
-            const weather_info = await update_weather(items.weather_api, n, items.weather_nx, items.weather_ny);
+        if (weather_api && (!items.weather_info_datetime || items.weather_info_datetime !== currentDatetime)) {
+            const weather_info = await update_weather(weather_api, n, items.weather_nx, items.weather_ny);
             console.log(weather_info);
             API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: currentDatetime });
         } else {

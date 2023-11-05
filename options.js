@@ -3,6 +3,8 @@ let API =  (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 let cur_weather_location = {weather_location_str: "", weather_nx: 0, weather_ny: 0};
 let weather_locations;
 let coordinates_data = null;
+let debounceTimeout;
+const debounceDelay = 300;
 
 async function fetch_weather_locations(val) {
     /*
@@ -24,22 +26,10 @@ kor,1111051500,서울특별시,종로구,청운효자동,60,127,126,58,14.35,37,
         3. 검색 작업은 여태 찾은 엘리먼트가 10개가 넘어가면 중단하며, 마지막 엘리먼트의 첫 번째 엘리먼트의 값은 ...가 된다.
 
     */
-    let data;
-    if (!coordinates_data) {
-        console.log("starts to open the file");
-        const response = await fetch('assets/KMA_forecast_coordinates.csv');
-        console.log("starts to parse the file");
-        data = await response.text();
-        console.log("end of parsing");
-        coordinates_data = data;
-    } else {
-        data = coordinates_data;
-    }
-
-    const lines = data.split('\n');
+   if (!val) return [];
+    const lines = coordinates_data.split('\n');
     const results = [];
   
-    console.log("starts to search...");
     for (const line of lines) {
         if (results.length >= 10) {
             results.push(['...', '...']);
@@ -54,7 +44,6 @@ kor,1111051500,서울특별시,종로구,청운효자동,60,127,126,58,14.35,37,
             results.push([locationString, gridValue]);
         }        
     }
-    console.log("end of search");
   
     return results;
 }
@@ -85,15 +74,18 @@ async function restoreOptions() {
         API.storage.sync.set({weather_api: document.querySelector("#weather_api input").value});
     });
 
-    document.querySelector("#weather_location input").addEventListener('change', async () => {
-        document.querySelector("#weather_location_combo").innerHTML = "";
-        weather_locations = await fetch_weather_locations(document.querySelector("#weather_location input").value);
-        weather_locations.forEach((location_info) => {
-            let option = document.createElement("option");
-            option.value = location_info[1];
-            option.text = location_info[0];
-            document.querySelector("#weather_location_combo").appendChild(option);
-        });
+    document.querySelector("#weather_location input").addEventListener('input', () => {
+        clearTimeout(debounceTimeout); // 이전 타이머를 취소
+        debounceTimeout = setTimeout(async () => { // 새로운 타이머를 설정
+            document.querySelector("#weather_location_combo").innerHTML = "";
+            const weather_locations = await fetch_weather_locations(document.querySelector("#weather_location input").value);
+            weather_locations.forEach((location_info) => {
+                let option = document.createElement("option");
+                option.value = location_info[1];
+                option.text = location_info[0];
+                document.querySelector("#weather_location_combo").appendChild(option);
+            });
+        }, debounceDelay);
     });
 
     document.querySelector("#weather_location_combo").addEventListener("change", (e) => {
@@ -107,6 +99,7 @@ async function restoreOptions() {
     });
 
     document.querySelector("#weather_location button").addEventListener("click", ()=>{
+        if (!cur_weather_location) return;
         console.log(cur_weather_location);
         API.storage.sync.set(cur_weather_location);
     });
@@ -130,5 +123,7 @@ async function restoreOptions() {
 
 
 document.addEventListener('DOMContentLoaded', async ()=> {
+    const response = await fetch('assets/KMA_forecast_coordinates.csv');
+    coordinates_data = await response.text();
     restoreOptions();
 });

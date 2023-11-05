@@ -83,10 +83,16 @@ class Main{
                 this.weather_visibility = true;
                 API.storage.sync.set({weather_visibility: true});
             }
-            if (this.weather_visibility)
+            if (this.weather_visibility) {
                 this.weather_info_obj.querySelector("iframe").src = "weather.html";
-
-            this.move_folder(initial_folder_id);
+            }
+            var self = this;
+            API.bookmarks.getTree(function(bookmarkTreeNodes) {
+                let counts = bookmarkTreeNodes[0].children.map(node => node.children ? node.children.length : 0);
+                let maxCount = Math.max(...counts);
+                initial_folder_id = bookmarkTreeNodes[0].children[counts.indexOf(maxCount)].id;
+                self.move_folder(initial_folder_id);
+            });
         });
     }
 
@@ -487,7 +493,7 @@ class ModBox
 }
 
 let API = (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
-var initial_folder_id = (navigator.userAgent.indexOf("Firefox") != -1) ?"toolbar_____" : "1";
+var initial_folder_id;
 var main = new Main(document.querySelector("main"));
 var mod_box = new ModBox(document.querySelector("div.mod_box"));
 

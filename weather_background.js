@@ -7,7 +7,9 @@ API.runtime.onMessage.addListener(
     if (request.greeting === "fetchWeather") {
 
       API.storage.sync.get(null, async (items) => {
-        const current_datetime = new Date().toISOString();
+        const date = new Date();
+        const offset = date.getTimezoneOffset() * 60000;
+        const current_datetime = (new Date(date - offset)).toISOString();
         console.log("current update datetime:", current_datetime);
         const response_weather_api_key = await fetch('weather_api_key.json');
         const config = await response_weather_api_key.json();
@@ -25,8 +27,7 @@ function get_number_str(encoded_str) {
   return /\d/.test(encoded_str) ? encoded_str : "-";
 }
 
-function get_time_num() {
-  const nowDate = new Date();
+function get_time_num(nowDate) {
   const quotient = (nowDate.getHours() * 60 + nowDate.getMinutes() - 130);
   let time_num = Math.floor((nowDate.getHours() * 60 + nowDate.getMinutes() - 130) / 180) * 180 + 130;
   if (quotient < 0) {
@@ -85,18 +86,22 @@ function get_icon_str(nowDate, time, sky, pty) {
 }
 
 async function update_weather(weather_api, n, weather_nx, weather_ny) {
-    const nowDate = new Date();
-    const time_num = get_time_num();
+    const cur_date = new Date();
+    const offset = cur_date.getTimezoneOffset() * 60000;
+    const nowDate = new Date(cur_date - offset);
+    const time_num = get_time_num(cur_date);
+
     let base_date = nowDate.toISOString().slice(0, 10).replace(/-/g, "");
 
-    const quotient = (nowDate.getHours() * 60 + nowDate.getMinutes() - 130);
+    const quotient = (cur_date.getHours() * 60 + cur_date.getMinutes() - 130);
     if (quotient < 0) {
-      nowDate.setDate(nowDate.getDate() - 1);
+      cur_date.setDate(cur_date.getDate() - 1);
+      const offset = cur_date.getTimezoneOffset() * 60000;
+      const nowDate = new Date(cur_date - offset);
       base_date = nowDate.toISOString().slice(0, 10).replace(/-/g, "");
     }
 
     const base_time = new Date(time_num * 60 * 1000).toISOString().substr(11, 5).replace(":", "");
-
     if (!weather_nx || !weather_ny) return;
     const params = new URLSearchParams({
       serviceKey: weather_api,

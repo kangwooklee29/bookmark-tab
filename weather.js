@@ -41,11 +41,15 @@ async function run_weather(weatherInfo) {
 
 }
 
+const date = new Date();
+const offset = date.getTimezoneOffset() * 60000;
+const current_datetime = (new Date(date - offset)).toISOString().slice(0, 13);
+
 API.storage.sync.get(null, async (items) => {
   console.log(items);
   if (items.weather_info) {
     document.querySelector("#weatherTable").style.display = "none";
-    if (items.weather_info_datetime !== new Date().toISOString().slice(0, 13)) {
+    if (items.weather_info_datetime !== current_datetime) {
       API.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
         console.log("Response:", response);
         document.querySelector("#weatherTable").style.display = "block";

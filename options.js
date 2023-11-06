@@ -88,7 +88,7 @@ async function restoreOptions() {
         if (e.target.value === "...") alert("Too many search results; Please use more specified keywords.");
         else {
             const vals = e.target.value.split("/");
-            cur_weather_location.weather_location_str = e.target.textContent.trim();
+            cur_weather_location.weather_location_str = e.target.options[e.target.selectedIndex].textContent;
             cur_weather_location.weather_nx = vals[0];
             cur_weather_location.weather_ny = vals[1];
         }
@@ -96,7 +96,6 @@ async function restoreOptions() {
 
     document.querySelector("#weather_location button").addEventListener("click", ()=>{
         if (!cur_weather_location) alert("Select the appropriate address from the list below.");
-        console.log(cur_weather_location);
         API.storage.sync.set(cur_weather_location, () => {
             API.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
                 console.log("Response:", response);
@@ -119,10 +118,7 @@ async function restoreOptions() {
     {
         try {
             API.storage.sync.set(JSON.parse(document.querySelector("#restore_backup textarea").value), ()=>{
-                    window.location.href = window.location.href.split("?")[0];
-                    API.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
-                        console.log("Response:", response);
-                    });            
+                window.location.href = window.location.href.split("?")[0];
             });
         }
         catch(e){

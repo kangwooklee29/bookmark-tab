@@ -1,35 +1,25 @@
 let API =  (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 let n = 10;
 
-// Fetch weather data when the service worker starts
-fetchWeatherData();
-
+// 옵션에서 새로운 주소지를 설정한 경우, 새 탭 페이지를 열었는데 현재 시간이 저장된 시간과 다른 경우 메시지 전송이 이뤄진다.
 API.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-      if (request.greeting === "fetchWeather") {
-          API.storage.sync.set({  weather_info_datetime: null }, () => { fetchWeatherData(); });
-          sendResponse({farewell: true});
-      }
-      return true;
+    if (request.greeting === "fetchWeather") {
+
+      API.storage.sync.get(null, async (items) => {
+        const current_datetime = new Date().toISOString();
+        console.log("current update datetime:", current_datetime);
+        const response_weather_api_key = await fetch('weather_api_key.json');
+        const config = await response_weather_api_key.json();
+        const weather_info = await update_weather(config.weather_api, n, items.weather_nx, items.weather_ny);
+        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: current_datetime.slice(0, 13) }, () => {console.log("done");});
+      });
+    
+      sendResponse({farewell: true});
+    }
+    return true;
   }
 );
-
-API.runtime.onInstalled.addListener(() => {
-  // 설치가 완료되었을 때 실행될 알람을 설정합니다.
-  API.alarms.create("hourlyAlarm", { periodInMinutes: 60 });
-
-  // 알람이 울릴 때마다 실행될 이벤트 리스너를 등록합니다.
-  API.alarms.onAlarm.addListener(function(alarm) {
-    if (alarm.name === "hourlyAlarm") {
-      fetchWeatherData();
-    }
-  });
-});
-
-API.runtime.onStartup.addListener(() => {
-  // 브라우저가 시작될 때 실행될 알람을 다시 확인하거나 설정합니다.
-  API.alarms.create("hourlyAlarm", { periodInMinutes: 60 });
-});
 
 function get_number_str(encoded_str) {
   return /\d/.test(encoded_str) ? encoded_str : "-";
@@ -108,7 +98,6 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
     const base_time = new Date(time_num * 60 * 1000).toISOString().substr(11, 5).replace(":", "");
 
     if (!weather_nx || !weather_ny) return;
-    console.log(weather_nx, weather_ny);
     const params = new URLSearchParams({
       serviceKey: weather_api,
       pageNo: '1',
@@ -169,24 +158,4 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
     }
 
     return weather_info;
-}
-
-async function fetchWeatherData() {
-    API.storage.sync.get(null, async (items) => {
-        let weather_api = null;
-        if (items.weather_api)
-          weather_api = items.weather_api;
-        else {
-          const response_weather_api_key = await fetch('weather_api_key.json');
-          const config = await response_weather_api_key.json();
-          weather_api = config.weather_api;
-        }
-        const currentDatetime = new Date().toISOString().slice(0, 13).replace('T', ' ');
-        if (weather_api && (!items.weather_info_datetime || items.weather_info_datetime !== currentDatetime)) {
-            const weather_info = await update_weather(weather_api, n, items.weather_nx, items.weather_ny);
-            API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: currentDatetime });
-        } else {
-          console.log(`tried to update weather info but didn't because the latest update time ${items.weather_info_datetime} is the same as the current time ${currentDatetime}.`);
-        }
-    });
 }

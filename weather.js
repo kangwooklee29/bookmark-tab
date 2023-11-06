@@ -43,7 +43,18 @@ async function run_weather(weatherInfo) {
 
 API.storage.sync.get(['weather_info'], async (items) => {
   if (items.weather_info) {
-    run_weather(items.weather_info);
+    document.querySelector("#weatherTable").style.display = "none";
+    const weather_info = items.weather_info;
+    const currentDatetime = new Date().toISOString().slice(0, 13).replace('T', ' ');
+    const intervalId = setInterval(() => {
+      API.storage.sync.get(['weather_info_datetime'], (items) => {
+          if (items.weather_info_datetime === currentDatetime) {
+              clearInterval(intervalId);
+              document.querySelector("#weatherTable").style.display = "block";
+              run_weather(weather_info);
+          }
+      });
+    }, 100);
   } else {
     window.location.href = "options.html?mode=setup";
   }

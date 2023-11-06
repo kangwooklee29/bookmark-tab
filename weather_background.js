@@ -14,10 +14,11 @@ API.runtime.onMessage.addListener(
         const response_weather_api_key = await fetch('weather_api_key.json');
         const config = await response_weather_api_key.json();
         const weather_info = await update_weather(config.weather_api, n, items.weather_nx, items.weather_ny);
-        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: current_datetime.slice(0, 13) }, () => {console.log("done");});
+        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: current_datetime.slice(0, 13) }, () => {
+          console.log("done");
+          sendResponse({farewell: true});
+        });
       });
-    
-      sendResponse({farewell: true});
     }
     return true;
   }
@@ -116,8 +117,20 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
 
     const url = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?${params.toString()}`;
 
-    const response = await fetch(url);
-    const res_json = await response.json();
+    let res_json = null;
+    for (let i = 0; i < 5; i++) {
+      try {
+        const response = await fetch(url);
+        res_json = await response.json();
+        break;
+      } catch (error) {
+        if (i < 4) { // 마지막 시도에서는 대기하지 않음
+          console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+    }
+    if (!res_json) { console.error('Failed to fetch weather info'); return; }
     const weather_info = [];
 
     if (res_json.response.header.resultCode === "00") {

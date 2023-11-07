@@ -40,9 +40,6 @@ document.body.addEventListener("click", (e)=>
     if (e.target.nodeName === "BUTTON" && e.target.classList.contains("delete"))
         mod_box.delete();
 
-    if (e.target.nodeName === "SPAN" && e.target.classList.contains("new_bookmark"))
-        mod_box.show_new_bookmark();
-    
     if (e.target.nodeName === "SPAN" && e.target.classList.contains("new_folder"))
         mod_box.show_new_folder();
 
@@ -376,7 +373,6 @@ class ModBox
         this.new_head_obj = $target.querySelector("h2.new");
         this.mod_head_obj = $target.querySelector("h2.mod");
         this.url_div_obj = $target.querySelector("div.url");
-        this.new_bookmark_obj = $target.querySelector("span.new_bookmark");
         this.new_folder_obj = $target.querySelector("span.new_folder");
         this.memo_obj = $target.querySelector("input.memo");
         this.elem = null;
@@ -438,29 +434,19 @@ class ModBox
     new_mod_box()
     {
         this.show_mod_box();
-        this.show_new_bookmark();
+        this.show_new_folder();
         if (this.del_obj.classList.contains("hide") === false) this.del_obj.classList.add("hide");
         if (this.mod_head_obj.classList.contains("hide") === false) this.mod_head_obj.classList.add("hide");
         this.new_head_obj.classList.remove("hide");
         this.name_obj.value = "";
-        this.url_obj.value = "https://";
         this.memo_obj.value = "";
         this.elem = null;
-    }
-
-    show_new_bookmark()
-    {
-        if (this.new_bookmark_obj.classList.contains("clicked") === false) this.new_bookmark_obj.classList.add("clicked");
-        this.url_div_obj.classList.remove("hide");
-        this.new_folder_obj.classList.remove("clicked");
-        this.url_obj.value = "https://";
     }
 
     show_new_folder()
     {
         if (this.new_folder_obj.classList.contains("clicked") === false) this.new_folder_obj.classList.add("clicked");
         if (this.url_div_obj.classList.contains("hide") === false) this.url_div_obj.classList.add("hide");
-        this.new_bookmark_obj.classList.remove("clicked");
         this.url_obj.value = null;
     }
 
@@ -507,7 +493,6 @@ document.querySelector('span.current-time').textContent = new Date().toLocaleStr
   
 
 document.querySelector('title').textContent = chrome.i18n.getMessage("newtab_title");
-document.querySelector('.new_bookmark').textContent = chrome.i18n.getMessage("new_bookmark");
 document.querySelector('.new_folder').textContent = chrome.i18n.getMessage("new_folder");
 document.querySelector('.mod').textContent = chrome.i18n.getMessage("modify");
 document.querySelector('#name').textContent = chrome.i18n.getMessage("name");

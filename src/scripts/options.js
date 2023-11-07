@@ -108,7 +108,7 @@ async function restoreOptions() {
                 API.storage.sync.get(['weather_info'], (items) => {
                     if (items.weather_info) {
                         clearInterval(intervalId);
-                        window.location.href = "weather.html";
+                        window.location.href = "../../components/weather.html";
                     }
                 });
             }, 100);
@@ -138,7 +138,7 @@ if (is_setup_mode) {
 }
 
 document.addEventListener('DOMContentLoaded', async ()=> {
-    const response = await fetch('assets/KMA_forecast_coordinates.csv');
+    const response = await fetch('../assets/data/KMA_forecast_coordinates.csv');
     coordinates_data = await response.text();
     restoreOptions();
 });

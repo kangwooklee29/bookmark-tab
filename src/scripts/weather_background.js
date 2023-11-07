@@ -12,7 +12,7 @@ API.runtime.onMessage.addListener(
         const current_datetime = (new Date(date - offset)).toISOString();
         console.log("current update datetime:", current_datetime);
         if (!config) {
-          const response = await fetch('weather_api_key.json');
+          const response = await fetch('../../weather_api_key.json');
           config = await response.json();
         }
         const weather_info = await update_weather(config.weather_api, n, items.weather_nx, items.weather_ny);
@@ -42,7 +42,7 @@ chrome.alarms.onAlarm.addListener(() => {
     const current_datetime = (new Date(date - offset)).toISOString();
     console.log("current update datetime:", current_datetime);
     if (!config) {
-      const response = await fetch('weather_api_key.json');
+      const response = await fetch('../../weather_api_key.json');
       config = await response.json();
     }
     const weather_info = await update_weather(config.weather_api, n, items.weather_nx, items.weather_ny);
@@ -88,24 +88,24 @@ function get_lunar_day() {
 }
 
 function day_icon_src(sky) {
-  if (sky <= 5) return "assets/sun.svg";
-  if (sky <= 8) return "assets/sun_and_cloud.svg";
-  return "assets/day_cloud.svg";
+  if (sky <= 5) return "../src/assets/img/sun.svg";
+  if (sky <= 8) return "../src/assets/img/sun_and_cloud.svg";
+  return "../src/assets/img/day_cloud.svg";
 }
 
 function night_icon_src(sky) {
   const lunar_day = get_lunar_day();
-  if (sky <= 5) return (lunar_day >= 12 && lunar_day <= 18) ? "assets/full_moon.svg" : "assets/moon.svg";
-  if (sky <= 8) return "assets/moon_and_cloud.svg";
-  return "assets/night_cloud.svg";
+  if (sky <= 5) return (lunar_day >= 12 && lunar_day <= 18) ? "../src/assets/img/full_moon.svg" : "../src/assets/img/moon.svg";
+  if (sky <= 8) return "../src/assets/img/moon_and_cloud.svg";
+  return "../src/assets/img/night_cloud.svg";
 }
 
 function get_icon_str(nowDate, time, sky, pty) {
   const icon_src = {
-      "1": "assets/rain.svg",
-      "2": "assets/rain_and_snow.svg",
-      "3": "assets/snow.svg",
-      "4": "assets/rain.svg"
+      "1": "../src/assets/img/rain.svg",
+      "2": "../src/assets/img/rain_and_snow.svg",
+      "3": "../src/assets/img/snow.svg",
+      "4": "../src/assets/img/rain.svg"
   };
   if (pty === "0") {
       if (time <= 3 || time >= 21) return night_icon_src(sky);

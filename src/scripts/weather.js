@@ -62,6 +62,6 @@ API.storage.sync.get(null, async (items) => {
       run_weather(items.weather_info);  
     }
   } else {
-    window.location.href = "options.html?mode=setup";
+    window.location.href = "../src/pages/options.html?mode=setup";
   }
 });

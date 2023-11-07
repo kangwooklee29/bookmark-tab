@@ -3,16 +3,16 @@
     "name": "Bookmark Tab",
     "description": "Displays your bookmarks in a neat layout on the new tab page.",
     "icons": {
-      "256": "assets/logo.png"
+      "256": "src/assets/img/logo.png"
     },
     "version": "1.0",
     "chrome_url_overrides" : {
-        "newtab": "index.html"
+        "newtab": "src/pages/index.html"
       },
     "permissions": ["bookmarks", "storage", "alarms"],
-    "options_page": "options.html",
+    "options_page": "src/pages/options.html",
     "default_locale": "en",
     "background": {
-      "service_worker": "weather_background.js"
+      "service_worker": "src/scripts/weather_background.js"
     }
 }

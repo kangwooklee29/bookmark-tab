@@ -103,7 +103,7 @@ class Main{
                 API.storage.sync.set({weather_visibility: true});
             }
             if (this.weather_visibility) {
-                this.weather_info_obj.querySelector("iframe").src = "weather.html";
+                this.weather_info_obj.querySelector("iframe").src = "../../components/weather.html";
             }
             var self = this;
             API.bookmarks.getTree(function(bookmarkTreeNodes) {

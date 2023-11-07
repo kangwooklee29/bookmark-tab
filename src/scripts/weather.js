@@ -33,7 +33,7 @@ async function run_weather(weatherInfo) {
         const cell = document.createElement('td');
         cell.innerHTML = info[key];
         if (key === 'pcp') {
-          if (info[key].includes("snow"))
+          if (info['icon'].includes("snow"))
             cell.innerHTML = `${info[key] / 10}㎝`;
           else 
             cell.innerHTML += "㎜";

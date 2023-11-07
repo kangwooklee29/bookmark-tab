@@ -47,18 +47,6 @@ chrome.alarms.onAlarm.addListener(() => {
 chrome.runtime.onInstalled.addListener(setAlarmForNextHour);
 chrome.runtime.onStartup.addListener(setAlarmForNextHour);
 
-function sun_rises_at_6(nowDate) {
-  const start = new Date(nowDate.getFullYear(), 3, 13);
-  const end = new Date(nowDate.getFullYear(), 7, 30);
-  return (nowDate > start && nowDate < end);
-}
-
-function sun_rises_at_18(nowDate) {
-  const start = new Date(nowDate.getFullYear(), 1, 6);
-  const end = new Date(nowDate.getFullYear(), 9, 12);
-  return (nowDate > start && nowDate < end);
-}
-
 function get_lunar_day() {
   const date1 = new Date();
   const date2 = new Date('2021-09-06');
@@ -79,17 +67,14 @@ function night_icon_src(sky) {
   return "../src/assets/img/night_cloud.svg";
 }
 
-function get_icon_str(nowDate, time, pty) {
+function get_icon_str(is_day, pty) {
   const icon_src = {
       rain: "../src/assets/img/rain.svg",
       rain_and_snow: "../src/assets/img/rain_and_snow.svg",
       snow: "../src/assets/img/snow.svg"
   };
   if (pty < 500 || pty > 629) {
-      if (time <= 3 || time >= 21) return night_icon_src(pty);
-      if (time >= 9 && time <= 15) return day_icon_src(pty);
-      if (time === 6) return (sun_rises_at_6(nowDate)) ? day_icon_src(pty) : night_icon_src(pty);
-      return (sun_rises_at_18(nowDate)) ? day_icon_src(pty) : night_icon_src(pty);
+    return is_day ? day_icon_src(pty) : night_icon_src(pty);
   } else if (pty < 600)
     return icon_src.rain;
   else if (pty >= 610 && pty < 620)
@@ -113,8 +98,6 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
       lon: weather_loc.longitude
     });
 
-
-
     let url = `https://api.openweathermap.org/data/2.5/weather?${params.toString()}`;
     let res_json = null;
     for (let i = 0; i < 5; i++) {
@@ -132,7 +115,10 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
     }
     if (!res_json) { console.error('Failed to fetch weather info'); return; }
 
-    if (res_json.cod === "200") {
+    let sunrise, sunset;
+    if (res_json.cod === 200 && cur_date.getHours() % 3 !== 0) {
+      sunrise = new Date(res_json.sys.sunrise * 1000).getHours();
+      sunset = new Date(res_json.sys.sunset * 1000).getHours();
       records.push(res_json);
     }
 
@@ -163,25 +149,31 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
       for (const item of records) {
         time.push(new Date(item.dt * 1000).getHours());
 
-        pop.push(item.pop * 100);
+        if (item.pop !== undefined)
+          pop.push(item.pop * 100);
+        else
+          pop.push(0);
 
         const celsius = item.main.temp - 273.15;
         tmp.push(celsius >= 0 ? Math.round(celsius) : Math.round(celsius * 10) / 10);
 
-        if (item.rain)
-          pcp.push(Math.floor(item.coord ? item.rain["1h"] : item.rain["3h"] / 3));
+        if (item.rain && ("1h" in item.rain || "3h" in item.rain))
+          pcp.push(Math.floor("1h" in item.rain ? item.rain["1h"] : item.rain["3h"] / 3));
+        else if (item.snow && ("1h" in item.snow || "3h" in item.snow))
+          pcp.push(Math.floor("1h" in item.snow ? item.snow["1h"] : item.snow["3h"] / 3));
         else
-          pcp.push(Math.floor(item.coord ? item.snow["1h"] : item.snow["3h"] / 3));
+          pcp.push(0);
 
         pty.push(item.weather[0].id); // 현재 눈/비 오는지. 비오면 5xx, 눈오면 60x or 62x, 눈비는 61x. 
 
         cnt++;
-        if (cnt > n) break;
+        if (cnt >= n) break;
       }
   
       for (let i = 0; i < cnt; i++) {
+        console.log(time[i], sunrise, sunset);
         weather_info.push({
-          icon: `<img src="${get_icon_str(new Date(), time[i], pty[i])}">`,
+          icon: `<img src="${get_icon_str((time[i] > sunrise && time[i] < sunset), pty[i])}">`,
           time: time[i],
           tmp: tmp[i],
           pcp: pcp[i],

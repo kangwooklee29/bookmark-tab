@@ -9,10 +9,9 @@
     "cancel": { "message": "취소" },
     "confirm": { "message": "확인" },
     "weather_visibility": { "message": "날씨 보이기" },
-    "weather_location": { "message": "현재 위치" },
+    "location_consent": { "message": "위치 정보 동의 묻기" },
     "save": { "message": "저장" },
     "restore": { "message": "복구" },
     "restore_backup": { "message": "복구 백업" },
-    "address_placeholder": { "message": "주소를 입력하세요"},
-    "selected_label": { "message": "선택됨"}
+    "click_to_ask": { "message": "클릭"}
 }

@@ -9,14 +9,14 @@ API.runtime.onMessage.addListener(
       API.storage.sync.get(null, async (items) => {
         const date = new Date();
         const offset = date.getTimezoneOffset() * 60000;
-        const current_datetime = (new Date(date - offset)).toISOString();
+        const current_datetime = (new Date(date - offset)).toISOString(), cur_hour_div_3 = Math.floor(date.getHours() / 3);
         console.log("current update datetime:", current_datetime);
         if (!config) {
           const response = await fetch('../../weather_api_key.json');
           config = await response.json();
         }
-        const weather_info = await update_weather(config.weather_api, n, items.weather_nx, items.weather_ny);
-        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: current_datetime.slice(0, 13) }, () => {
+        const weather_info = await update_weather(config.weather_api, n, request.weather_loc);
+        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: `${current_datetime.slice(0, 10)}${cur_hour_div_3}`, weather_loc: request.weather_loc }, () => {
           console.log("done");
           sendResponse({farewell: true});
         });
@@ -39,14 +39,14 @@ chrome.alarms.onAlarm.addListener(() => {
   API.storage.sync.get(null, async (items) => {
     const date = new Date();
     const offset = date.getTimezoneOffset() * 60000;
-    const current_datetime = (new Date(date - offset)).toISOString();
+    const current_datetime = (new Date(date - offset)).toISOString(), cur_hour_div_3 = Math.floor(date.getHours() / 3);
     console.log("current update datetime:", current_datetime);
     if (!config) {
       const response = await fetch('../../weather_api_key.json');
       config = await response.json();
     }
-    const weather_info = await update_weather(config.weather_api, n, items.weather_nx, items.weather_ny);
-    API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: current_datetime.slice(0, 13) }, () => {
+    const weather_info = await update_weather(config.weather_api, n, items.weather_loc);
+    API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: `${current_datetime.slice(0, 10)}${cur_hour_div_3}` }, () => {
       console.log("done");
     });
   });
@@ -57,15 +57,6 @@ chrome.runtime.onStartup.addListener(setAlarmForNextHour);
 
 function get_number_str(encoded_str) {
   return /\d/.test(encoded_str) ? encoded_str : "-";
-}
-
-function get_time_num(nowDate) {
-  const quotient = (nowDate.getHours() * 60 + nowDate.getMinutes() - 130);
-  let time_num = Math.floor((nowDate.getHours() * 60 + nowDate.getMinutes() - 130) / 180) * 180 + 130;
-  if (quotient < 0) {
-      time_num = 1390;
-  }
-  return time_num;
 }
 
 function sun_rises_at_6(nowDate) {
@@ -88,65 +79,45 @@ function get_lunar_day() {
 }
 
 function day_icon_src(sky) {
-  if (sky <= 5) return "../src/assets/img/sun.svg";
-  if (sky <= 8) return "../src/assets/img/sun_and_cloud.svg";
+  if (sky == 800) return "../src/assets/img/sun.svg";
+  if (sky <= 802) return "../src/assets/img/sun_and_cloud.svg";
   return "../src/assets/img/day_cloud.svg";
 }
 
 function night_icon_src(sky) {
   const lunar_day = get_lunar_day();
-  if (sky <= 5) return (lunar_day >= 12 && lunar_day <= 18) ? "../src/assets/img/full_moon.svg" : "../src/assets/img/moon.svg";
-  if (sky <= 8) return "../src/assets/img/moon_and_cloud.svg";
+  if (sky == 800) return (lunar_day >= 12 && lunar_day <= 18) ? "../src/assets/img/full_moon.svg" : "../src/assets/img/moon.svg";
+  if (sky <= 802) return "../src/assets/img/moon_and_cloud.svg";
   return "../src/assets/img/night_cloud.svg";
 }
 
-function get_icon_str(nowDate, time, sky, pty) {
+function get_icon_str(nowDate, time, pty) {
   const icon_src = {
-      "1": "../src/assets/img/rain.svg",
-      "2": "../src/assets/img/rain_and_snow.svg",
-      "3": "../src/assets/img/snow.svg",
-      "4": "../src/assets/img/rain.svg"
+      rain: "../src/assets/img/rain.svg",
+      rain_and_snow: "../src/assets/img/rain_and_snow.svg",
+      snow: "../src/assets/img/snow.svg"
   };
-  if (pty === "0") {
-      if (time <= 3 || time >= 21) return night_icon_src(sky);
-      if (time >= 9 && time <= 15) return day_icon_src(sky);
-      if (time === 6) return (sun_rises_at_6(nowDate)) ? day_icon_src(sky) : night_icon_src(sky);
-      return (sun_rises_at_18(nowDate)) ? day_icon_src(sky) : night_icon_src(sky);
-  } else {
-      return icon_src[pty];
-  }
+  if (pty < 500 || pty > 629) {
+      if (time <= 3 || time >= 21) return night_icon_src(pty);
+      if (time >= 9 && time <= 15) return day_icon_src(pty);
+      if (time === 6) return (sun_rises_at_6(nowDate)) ? day_icon_src(pty) : night_icon_src(pty);
+      return (sun_rises_at_18(nowDate)) ? day_icon_src(pty) : night_icon_src(pty);
+  } else if (pty < 600)
+    return icon_src.rain;
+  else if (pty >= 610 && pty < 620)
+    return icon_src.rain_and_snow;
+  return icon_src.snow;
 }
 
-async function update_weather(weather_api, n, weather_nx, weather_ny) {
-    const cur_date = new Date();
-    const offset = cur_date.getTimezoneOffset() * 60000;
-    const nowDate = new Date(cur_date - offset);
-    const time_num = get_time_num(cur_date);
-
-    let base_date = nowDate.toISOString().slice(0, 10).replace(/-/g, "");
-
-    const quotient = (cur_date.getHours() * 60 + cur_date.getMinutes() - 130);
-    if (quotient < 0) {
-      cur_date.setDate(cur_date.getDate() - 1);
-      const offset = cur_date.getTimezoneOffset() * 60000;
-      const nowDate = new Date(cur_date - offset);
-      base_date = nowDate.toISOString().slice(0, 10).replace(/-/g, "");
-    }
-
-    const base_time = new Date(time_num * 60 * 1000).toISOString().substr(11, 5).replace(":", "");
-    if (!weather_nx || !weather_ny) return;
+async function update_weather(weather_api, n, weather_loc) {
     const params = new URLSearchParams({
-      serviceKey: weather_api,
-      pageNo: '1',
-      numOfRows: '1000',
-      dataType: 'JSON',
-      nx: weather_nx,
-      ny: weather_ny,
-      base_time: base_time,
-      base_date: base_date
+      appid: weather_api,
+      lat: weather_loc.latitude,
+      lon: weather_loc.longitude
     });
 
-    const url = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?${params.toString()}`;
+    const url = `https://api.openweathermap.org/data/2.5/forecast?${params.toString()}`;
+    console.log(url);
 
     let res_json = null;
     for (let i = 0; i < 5; i++) {
@@ -155,6 +126,7 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
         res_json = await response.json();
         break;
       } catch (error) {
+        console.log(error);
         if (i < 4) { // 마지막 시도에서는 대기하지 않음
           console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -164,27 +136,27 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
     if (!res_json) { console.error('Failed to fetch weather info'); return; }
     const weather_info = [];
 
-    if (res_json.response.header.resultCode === "00") {
-      let cnt = 0;
-      const sky = [], pty = [], tmp = [], pcp = [], sno = [], pop = [], time = [];
+    if (res_json.cod === "200") {
+      const pty = [], tmp = [], pcp = [], sno = [], pop = [], time = [];
       
-      for (const item of res_json.response.body.items.item) {
-        const icat = item.category;
-        const ival = item.fcstValue;
-        const itime = parseInt(item.fcstTime.slice(0, 2), 10);
-        if (itime % 3 !== 0) continue;
-        
-        if (icat === "PTY") {
-          if (cnt === n) break;
-          time.push(itime);
-          pty.push(ival);
-          cnt++;
-        }
-        if (icat === "SKY" && sky.length < n) sky.push(ival);
-        if (icat === "TMP" && tmp.length < n) tmp.push(ival);
-        if (icat === "PCP" && pcp.length < n) pcp.push(ival);
-        if (icat === "SNO" && sno.length < n) sno.push(ival);
-        if (icat === "POP" && pop.length < n) pop.push(ival);
+      let cnt = 0;
+      for (const item of res_json.list) {
+        time.push(new Date(item.dt * 1000).getHours());
+
+        pop.push(parseInt(item.pop) * 100);
+
+        const celsius = item.main.temp - 273.15;
+        tmp.push(celsius >= 0 ? Math.round(celsius) : Math.round(celsius * 10) / 10);
+
+        if (item.rain)
+          pcp.push(parseInt(item.rain["3h"] / 3))
+        else if (item.snow)
+          pcp.push(parseInt(item.snow["3h"] / 3))
+
+        pty.push(item.weather[0].id); // 현재 눈/비 오는지. 비오면 5xx, 눈오면 60x or 62x, 눈비는 61x. 
+
+        cnt++;
+        if (cnt > n) break;
       }
   
       for (let i = 0; i < n; i++) {
@@ -195,7 +167,7 @@ async function update_weather(weather_api, n, weather_nx, weather_ny) {
           pcp[i] = get_number_str(sno[i]);
         }
         weather_info.push({
-          icon: `<img src="${get_icon_str(nowDate, time[i], sky[i], pty[i])}">`,
+          icon: `<img src="${get_icon_str(new Date(), time[i], pty[i])}">`,
           time: time[i],
           tmp: tmp[i],
           pcp: pcp[i],

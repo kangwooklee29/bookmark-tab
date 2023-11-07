@@ -7,6 +7,7 @@ This Privacy Policy outlines how the Bookmark Tab extension collects, uses, and 
 - **Bookmark Data**: We collect information related to the bookmarks you save.
 - **Storage Data**: We store information necessary for your preferences and extension settings in local storage.
 - **Alarms Data**: We collect information on the alarms set by the extension.
+- **Geolocation Data**: We collect information related to the geolocation where you are.
 
 ## Methods of Collection
 - When you use the extension to add, modify, or delete bookmarks.
@@ -16,6 +17,7 @@ This Privacy Policy outlines how the Bookmark Tab extension collects, uses, and 
 - **Bookmark Management**: To allow you to efficiently manage your bookmarks.
 - **Preference Storage**: To save your settings and personalize your extension experience.
 - **Notification Services**: To update the weather forcast information periodically.
+- **Geolocation Services**: To update the weather forcast information of the location where you are.
 
 ## Sharing of Information
 - We do not share your collected information with any third parties.

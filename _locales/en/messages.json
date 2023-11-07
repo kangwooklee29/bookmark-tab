@@ -9,10 +9,9 @@
     "cancel": { "message": "Cancel"},
     "confirm": { "message": "Confirm"},
     "weather_visibility": { "message": "Weather Visibility"},
-    "weather_location": { "message": "Weather Location"},
+    "location_consent": { "message": "Ask Location Consent"},
     "save": { "message": "SAVE"},
     "restore": { "message": "RESTORE" },
     "restore_backup": { "message": "Restore Back-up"},
-    "address_placeholder": { "message": "Type your address"},
-    "selected_label": { "message": "Selected"}
+    "click_to_ask": { "message": "Click to ask"}
 }

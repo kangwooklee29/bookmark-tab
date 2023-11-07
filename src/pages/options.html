@@ -7,25 +7,18 @@
   <body>
     <main>
         <h1>Bookmark Tab Options</h1>
-        <div id="weather_visibility">
+        <div id="location_consent">
+          <label>Ask Location Consent</label>
+          <item>
+            <div>
+              <div><button>Click to ask</button></div>
+            </div>
+          </item>
+      </div>
+      <div id="weather_visibility">
             <label>Weather Visibility</label>
             <item>
               <input type="checkbox" id="weather_visibility_checkbox" name="weather_visibility">
-            </item>
-        </div>
-        <div id="weather_location">
-            <label>Weather location</label>
-            <item>
-              <div>
-                <div><input type="text" placeholder="Type your address"></div>
-              </div>
-                <div><select id="weather_location_combo" name="weather_location" size="4">
-                </select></div>
-              <div>
-                <span class="selected_label">Selected: </span>
-                <span class="selected_address"></span>
-                <div><button>SAVE</button></div>
-              </div>
             </item>
         </div>
         <div id="restore_backup">

@@ -31,7 +31,13 @@ async function run_weather(weatherInfo) {
       const row = document.createElement('tr');
       weatherInfo.forEach(info => {
         const cell = document.createElement('td');
-        cell.innerHTML = info[key].replace("mm", "㎜").replace("cm", "㎝");
+        cell.innerHTML = info[key];
+        if (key === 'pcp') {
+          if (info[key].includes("snow"))
+            cell.innerHTML = `${info[key] / 10}㎝`;
+          else 
+            cell.innerHTML += "㎜";
+        }
         if (key === "tmp") cell.innerHTML += "℃";
         if (key === "pop") cell.innerHTML += "%";
         row.appendChild(cell);
@@ -41,27 +47,34 @@ async function run_weather(weatherInfo) {
 
 }
 
+
+async function fetch_weather_loc() {
+  const position = await new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+  
+  return position.coords;
+}
+
+
 const date = new Date();
 const offset = date.getTimezoneOffset() * 60000;
-const current_datetime = (new Date(date - offset)).toISOString().slice(0, 13);
+const cur_date_str = (new Date(date - offset)).toISOString().slice(0, 10), cur_hour_div_3 = Math.floor(date.getHours() / 3);
 
-API.storage.sync.get(null, async (items) => {
+API.storage.sync.get(['weather_info_datetime', 'weather_info', 'weather_loc'], async (items) => {
   console.log(items);
-  if (items.weather_info) {
-    document.querySelector("#weatherTable").style.display = "none";
-    if (items.weather_info_datetime !== current_datetime) {
-      API.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
-        console.log("Response:", response);
-        document.querySelector("#weatherTable").style.display = "block";
-        API.storage.sync.get(null, async (items) => {
-          run_weather(items.weather_info);
-        });
+  let weather_loc = items.weather_loc;
+  if (!items.weather_loc) {
+    weather_loc = await fetch_weather_loc();
+  }
+  if (items.weather_info_datetime !== `${cur_date_str}${cur_hour_div_3}`) {
+    API.runtime.sendMessage( {greeting: "fetchWeather", weather_loc: {latitude: weather_loc.latitude, longitude: weather_loc.longitude}}, function(response) {
+      console.log("Response:", response);
+      API.storage.sync.get(['weather_info'], async (items) => {
+        run_weather(items.weather_info);
       });
-    } else {
-      document.querySelector("#weatherTable").style.display = "block";
-      run_weather(items.weather_info);  
-    }
+    });
   } else {
-    window.location.href = "../src/pages/options.html?mode=setup";
+    run_weather(items.weather_info);  
   }
 });

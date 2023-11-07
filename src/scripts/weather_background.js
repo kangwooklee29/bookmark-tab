@@ -9,14 +9,10 @@ API.runtime.onMessage.addListener(
       API.storage.sync.get(null, async (items) => {
         const date = new Date();
         const offset = date.getTimezoneOffset() * 60000;
-        const current_datetime = (new Date(date - offset)).toISOString(), cur_hour_div_3 = Math.floor(date.getHours() / 3);
+        const current_datetime = (new Date(date - offset)).toISOString();
         console.log("current update datetime:", current_datetime);
-        if (!config) {
-          const response = await fetch('../../weather_api_key.json');
-          config = await response.json();
-        }
-        const weather_info = await update_weather(config.weather_api, n, request.weather_loc);
-        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: `${current_datetime.slice(0, 10)}${cur_hour_div_3}`, weather_loc: request.weather_loc }, () => {
+        const weather_info = await update_weather(date, new Date(items.weather_info_datetime), request.weather_loc, items.weather_info);
+        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: date.getTime(), weather_loc: request.weather_loc }, () => {
           console.log("done");
           sendResponse({farewell: true});
         });
@@ -39,14 +35,10 @@ chrome.alarms.onAlarm.addListener(() => {
   API.storage.sync.get(null, async (items) => {
     const date = new Date();
     const offset = date.getTimezoneOffset() * 60000;
-    const current_datetime = (new Date(date - offset)).toISOString(), cur_hour_div_3 = Math.floor(date.getHours() / 3);
+    const current_datetime = (new Date(date - offset)).toISOString();
     console.log("current update datetime:", current_datetime);
-    if (!config) {
-      const response = await fetch('../../weather_api_key.json');
-      config = await response.json();
-    }
-    const weather_info = await update_weather(config.weather_api, n, items.weather_loc);
-    API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: `${current_datetime.slice(0, 10)}${cur_hour_div_3}` }, () => {
+    const weather_info = await update_weather(date, new Date(items.weather_info_datetime), items.weather_loc, items.weather_info);
+    API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: date.getTime() }, () => {
       console.log("done");
     });
   });
@@ -54,10 +46,6 @@ chrome.alarms.onAlarm.addListener(() => {
 
 chrome.runtime.onInstalled.addListener(setAlarmForNextHour);
 chrome.runtime.onStartup.addListener(setAlarmForNextHour);
-
-function get_number_str(encoded_str) {
-  return /\d/.test(encoded_str) ? encoded_str : "-";
-}
 
 function sun_rises_at_6(nowDate) {
   const start = new Date(nowDate.getFullYear(), 3, 13);
@@ -109,16 +97,25 @@ function get_icon_str(nowDate, time, pty) {
   return icon_src.snow;
 }
 
-async function update_weather(weather_api, n, weather_loc) {
-    const params = new URLSearchParams({
-      appid: weather_api,
+async function update_weather(cur_date, stored_date, weather_loc, prev_weather_info) {
+  const weather_info = [], records = [];
+
+  if (cur_date.getHours() === stored_date.getHours()) return prev_weather_info;
+
+  if (!config) {
+    const response = await fetch('../../weather_api_key.json');
+    config = await response.json();
+  }
+
+  const params = new URLSearchParams({
+      appid: config.weather_api,
       lat: weather_loc.latitude,
       lon: weather_loc.longitude
     });
 
-    const url = `https://api.openweathermap.org/data/2.5/forecast?${params.toString()}`;
-    console.log(url);
 
+
+    let url = `https://api.openweathermap.org/data/2.5/weather?${params.toString()}`;
     let res_json = null;
     for (let i = 0; i < 5; i++) {
       try {
@@ -134,24 +131,47 @@ async function update_weather(weather_api, n, weather_loc) {
       }
     }
     if (!res_json) { console.error('Failed to fetch weather info'); return; }
-    const weather_info = [];
 
     if (res_json.cod === "200") {
-      const pty = [], tmp = [], pcp = [], sno = [], pop = [], time = [];
+      records.push(res_json);
+    }
+
+    if (Math.floor(cur_date.getHours() / 3) !== Math.floor(stored_date.getHours() / 3)) {
+      url = `https://api.openweathermap.org/data/2.5/forecast?${params.toString()}`;
+      res_json = null;
+      for (let i = 0; i < 5; i++) {
+        try {
+          const response = await fetch(url);
+          res_json = await response.json();
+          break;
+        } catch (error) {
+          console.log(error);
+          if (i < 4) { // 마지막 시도에서는 대기하지 않음
+            console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+      }
+      if (!res_json) { console.error('Failed to fetch weather info'); return; }
+      records.push(...res_json.list);
+    } 
+
+    if (res_json.cod === "200") {
+      const pty = [], tmp = [], pcp = [], pop = [], time = [];
       
       let cnt = 0;
-      for (const item of res_json.list) {
+      for (const item of records) {
         time.push(new Date(item.dt * 1000).getHours());
 
-        pop.push(parseInt(item.pop) * 100);
+        pop.push(item.pop * 100);
 
         const celsius = item.main.temp - 273.15;
         tmp.push(celsius >= 0 ? Math.round(celsius) : Math.round(celsius * 10) / 10);
 
         if (item.rain)
-          pcp.push(parseInt(item.rain["3h"] / 3))
-        else if (item.snow)
-          pcp.push(parseInt(item.snow["3h"] / 3))
+          pcp.push(Math.floor(item.coord ? item.rain["1h"] : item.rain["3h"] / 3));
+        else
+          pcp.push(Math.floor(item.coord ? item.snow["1h"] : item.snow["3h"] / 3));
 
         pty.push(item.weather[0].id); // 현재 눈/비 오는지. 비오면 5xx, 눈오면 60x or 62x, 눈비는 61x. 
 
@@ -159,13 +179,7 @@ async function update_weather(weather_api, n, weather_loc) {
         if (cnt > n) break;
       }
   
-      for (let i = 0; i < n; i++) {
-        let temp = get_number_str(pcp[i]);
-        if (temp !== "") {
-          pcp[i] = temp;
-        } else {
-          pcp[i] = get_number_str(sno[i]);
-        }
+      for (let i = 0; i < cnt; i++) {
         weather_info.push({
           icon: `<img src="${get_icon_str(new Date(), time[i], pty[i])}">`,
           time: time[i],
@@ -173,6 +187,9 @@ async function update_weather(weather_api, n, weather_loc) {
           pcp: pcp[i],
           pop: pop[i]
         });
+      }
+      if (cnt === 1) {
+        weather_info.push(...prev_weather_info);
       }
 
       console.log("successfully updated weather info!");

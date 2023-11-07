@@ -59,7 +59,7 @@ async function fetch_weather_loc() {
 
 const date = new Date();
 const offset = date.getTimezoneOffset() * 60000;
-const cur_date_str = (new Date(date - offset)).toISOString().slice(0, 10), cur_hour_div_3 = Math.floor(date.getHours() / 3);
+const cur_date_str = (new Date(date - offset)).toISOString().slice(0, 13);
 
 API.storage.sync.get(['weather_info_datetime', 'weather_info', 'weather_loc'], async (items) => {
   console.log(items);
@@ -67,14 +67,10 @@ API.storage.sync.get(['weather_info_datetime', 'weather_info', 'weather_loc'], a
   if (!items.weather_loc) {
     weather_loc = await fetch_weather_loc();
   }
-  if (items.weather_info_datetime !== `${cur_date_str}${cur_hour_div_3}`) {
     API.runtime.sendMessage( {greeting: "fetchWeather", weather_loc: {latitude: weather_loc.latitude, longitude: weather_loc.longitude}}, function(response) {
       console.log("Response:", response);
       API.storage.sync.get(['weather_info'], async (items) => {
         run_weather(items.weather_info);
       });
     });
-  } else {
-    run_weather(items.weather_info);  
-  }
 });

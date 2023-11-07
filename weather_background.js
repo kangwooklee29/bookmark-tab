@@ -1,7 +1,11 @@
 let API =  (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 let n = 10;
-const response_weather_api_key = await fetch('weather_api_key.json');
-const config = await response_weather_api_key.json();
+let config;
+fetch('weather_api_key.json')
+.then(response => response.json())
+.then(conf => {
+  config = conf;
+})
 
 // 옵션에서 새로운 주소지를 설정한 경우, 새 탭 페이지를 열었는데 현재 시간이 저장된 시간과 다른 경우 메시지 전송이 이뤄진다.
 API.runtime.onMessage.addListener(

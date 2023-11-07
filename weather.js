@@ -53,7 +53,9 @@ API.storage.sync.get(null, async (items) => {
       API.runtime.sendMessage({greeting: "fetchWeather"}, function(response) {
         console.log("Response:", response);
         document.querySelector("#weatherTable").style.display = "block";
-        run_weather(items.weather_info);
+        API.storage.sync.get(null, async (items) => {
+          run_weather(items.weather_info);
+        });
       });
     } else {
       document.querySelector("#weatherTable").style.display = "block";

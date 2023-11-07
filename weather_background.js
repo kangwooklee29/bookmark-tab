@@ -1,11 +1,6 @@
 let API =  (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 let n = 10;
 let config;
-fetch('weather_api_key.json')
-.then(response => response.json())
-.then(conf => {
-  config = conf;
-})
 
 // 옵션에서 새로운 주소지를 설정한 경우, 새 탭 페이지를 열었는데 현재 시간이 저장된 시간과 다른 경우 메시지 전송이 이뤄진다.
 API.runtime.onMessage.addListener(
@@ -16,6 +11,10 @@ API.runtime.onMessage.addListener(
         const offset = date.getTimezoneOffset() * 60000;
         const current_datetime = (new Date(date - offset)).toISOString();
         console.log("current update datetime:", current_datetime);
+        if (!config) {
+          const response = await fetch('weather_api_key.json');
+          config = await response.json();
+        }
         const weather_info = await update_weather(config.weather_api, n, items.weather_nx, items.weather_ny);
         API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: current_datetime.slice(0, 13) }, () => {
           console.log("done");

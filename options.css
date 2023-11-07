@@ -33,8 +33,16 @@ main item {
     flex-direction: column;
 }
 
+#weather_location input {
+    width: 200px;
+}
+
+#weather_location button {
+    width: 42px;
+}
+
 #weather_location select {
-    width: 360px;
+    width: 250px;
 }
 
 main.setup > h1{
@@ -47,10 +55,6 @@ main.setup > div {
 
 main.setup > #weather_visibility {
     min-height: 20px;
-}
-
-main.setup > #weather_location select {
-    width: 250px;
 }
 
 main.loading, main.loading * {

@@ -14,5 +14,6 @@
     "save": { "message": "저장" },
     "restore": { "message": "복구" },
     "restore_backup": { "message": "복구 백업" },
-    "address_placeholder": { "message": "주소를 입력하세요"}
+    "address_placeholder": { "message": "주소를 입력하세요"},
+    "selected_label": { "message": "선택됨"}
 }

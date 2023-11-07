@@ -41,6 +41,10 @@ chrome.alarms.onAlarm.addListener(() => {
     const offset = date.getTimezoneOffset() * 60000;
     const current_datetime = (new Date(date - offset)).toISOString();
     console.log("current update datetime:", current_datetime);
+    if (!config) {
+      const response = await fetch('weather_api_key.json');
+      config = await response.json();
+    }
     const weather_info = await update_weather(config.weather_api, n, items.weather_nx, items.weather_ny);
     API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: current_datetime.slice(0, 13) }, () => {
       console.log("done");

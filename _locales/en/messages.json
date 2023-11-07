@@ -14,5 +14,6 @@
     "save": { "message": "SAVE"},
     "restore": { "message": "RESTORE" },
     "restore_backup": { "message": "Restore Back-up"},
-    "address_placeholder": { "message": "Type your address"}
+    "address_placeholder": { "message": "Type your address"},
+    "selected_label": { "message": "Selected"}
 }

@@ -34,7 +34,7 @@ main item {
 }
 
 #weather_location input {
-    width: 200px;
+    width: 242px;
 }
 
 #weather_location button {
@@ -43,6 +43,17 @@ main item {
 
 #weather_location select {
     width: 250px;
+}
+
+#weather_location span.selected_label {
+    justify-content: left;
+    width: 40px;
+}
+
+#weather_location span.selected_address {
+    justify-content: left;
+    padding-left: 8px;
+    width: 160px;
 }
 
 main.setup > h1{

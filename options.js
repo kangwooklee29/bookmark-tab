@@ -91,6 +91,7 @@ async function restoreOptions() {
             cur_weather_location.weather_location_str = e.target.options[e.target.selectedIndex].textContent;
             cur_weather_location.weather_nx = vals[0];
             cur_weather_location.weather_ny = vals[1];
+            document.querySelector("#weather_location span.selected_address").textContent = cur_weather_location.weather_location_str;
         }
     });
 
@@ -148,3 +149,4 @@ document.querySelector('#restore_backup > label').textContent = chrome.i18n.getM
 document.querySelector('#weather_location button').textContent = chrome.i18n.getMessage("save");
 document.querySelector('#restore_backup button').textContent = chrome.i18n.getMessage("restore");
 document.querySelector('#weather_location input').placeholder = chrome.i18n.getMessage("address_placeholder");
+document.querySelector('#weather_location span.selected_label').textContent = chrome.i18n.getMessage("selected_label") + ":";

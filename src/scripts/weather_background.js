@@ -106,7 +106,6 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
         res_json = await response.json();
         break;
       } catch (error) {
-        console.log(error);
         if (i < 4) { // 마지막 시도에서는 대기하지 않음
           console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -131,7 +130,6 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
           res_json = await response.json();
           break;
         } catch (error) {
-          console.log(error);
           if (i < 4) { // 마지막 시도에서는 대기하지 않음
             console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -171,7 +169,6 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
       }
   
       for (let i = 0; i < cnt; i++) {
-        console.log(time[i], sunrise, sunset);
         weather_info.push({
           icon: `<img src="${get_icon_str((time[i] > sunrise && time[i] < sunset), pty[i])}">`,
           time: time[i],

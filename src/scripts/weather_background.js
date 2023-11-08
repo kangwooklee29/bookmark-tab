@@ -7,15 +7,13 @@ API.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.greeting === "fetchWeather") {
       API.storage.sync.get(null, async (items) => {
-        const date = new Date();
-        const offset = date.getTimezoneOffset() * 60000;
-        const current_datetime = (new Date(date - offset)).toISOString();
-        console.log("current update datetime:", current_datetime);
-        const weather_info = await update_weather(date, new Date(items.weather_info_datetime), request.weather_loc, items.weather_info);
-        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: date.getTime(), weather_loc: request.weather_loc }, () => {
-          console.log("done");
-          sendResponse({farewell: true});
-        });
+        const weather_info = await update_weather( new Date(), new Date(items.weather_info_datetime), request.weather_loc, items.weather_info);
+        if (!items.weather_info || !weather_info.sort().every((val, idx) => val === items.weather_info[idx]))
+          API.storage.sync.set({ weather_info: weather_info.sort(), weather_info_datetime:  new Date().getTime(), weather_loc: request.weather_loc }, () => {
+            console.log("done");
+            sendResponse({farewell: true});
+          });
+        else sendResponse({farewell: true});
       });
     }
     return true;
@@ -33,14 +31,11 @@ function setAlarmForNextHour() {
 
 chrome.alarms.onAlarm.addListener(() => {
   API.storage.sync.get(null, async (items) => {
-    const date = new Date();
-    const offset = date.getTimezoneOffset() * 60000;
-    const current_datetime = (new Date(date - offset)).toISOString();
-    console.log("current update datetime:", current_datetime);
-    const weather_info = await update_weather(date, new Date(items.weather_info_datetime), items.weather_loc, items.weather_info);
-    API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: date.getTime() }, () => {
-      console.log("done");
-    });
+    const weather_info = await update_weather( new Date(), new Date(items.weather_info_datetime), items.weather_loc, items.weather_info);
+    if (!items.weather_info || !weather_info.sort().every((val, idx) => val === items.weather_info[idx]))
+      API.storage.sync.set({ weather_info: weather_info, weather_info_datetime:  new Date().getTime() }, () => {
+        console.log("done");
+      });
   });
 });
 
@@ -86,6 +81,8 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
   const weather_info = [], records = [];
 
   if (cur_date.getHours() === stored_date.getHours()) return prev_weather_info;
+
+  console.log("current update datetime:", (new Date(cur_date - cur_date.getTimezoneOffset() * 60000)).toISOString());
 
   if (!config) {
     const response = await fetch('../../weather_api_key.json');

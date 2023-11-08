@@ -14,4 +14,6 @@ You can view your bookmarks on the new tab page of your browser, and easily rear
 <img width="640" src="https://github.com/kangwooklee29/bookmark-tab/assets/141019638/0ca88144-3b4c-425e-96a2-650d9c0bf189">
 
 ## Links
+- Bookmark Tab - [GitHub Repository](https://github.com/kangwooklee29/bookmark-tab), [Privacy Policy](docs/privacy.html)
 - Chrome Web Store - [Bookmark Tab](https://chrome.google.com/webstore/detail/bookmark-tab/lhjdhaialhgbiopcdghljjiibpebhmhc)
+- OpenWeatherMap - [Privacy Policy](https://openweather.co.uk/privacy-policy)

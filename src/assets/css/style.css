@@ -26,7 +26,7 @@ body {
     margin-top:50px;
 }  
 
-div > img {
+div.header-container > a > img {
     margin-top:25px;
     margin-right: 12px;
     height: 25px;

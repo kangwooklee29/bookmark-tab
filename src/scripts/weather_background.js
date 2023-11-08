@@ -7,9 +7,12 @@ API.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.greeting === "fetchWeather") {
       API.storage.sync.get(null, async (items) => {
-        const weather_info = await update_weather( new Date(), new Date(items.weather_info_datetime), request.weather_loc, items.weather_info);
-        if (!items.weather_info || !weather_info.sort().every((val, idx) => val === items.weather_info[idx]))
-          API.storage.sync.set({ weather_info: weather_info.sort(), weather_info_datetime:  new Date().getTime(), weather_loc: request.weather_loc }, () => {
+
+        var now = new Date();
+        const weather_info = await update_weather( now, new Date(items.weather_info_datetime), request.weather_loc, items.weather_info);
+        console.log(items.weather_info, weather_info);
+        if (!items.weather_info || !weather_info.every((val, idx) => val.time === items.weather_info[idx].time))
+          API.storage.sync.set({ weather_info: weather_info, weather_info_datetime:  new Date().getTime(), weather_loc: request.weather_loc }, () => {
             console.log("done");
             sendResponse({farewell: true});
           });
@@ -32,7 +35,7 @@ function setAlarmForNextHour() {
 chrome.alarms.onAlarm.addListener(() => {
   API.storage.sync.get(null, async (items) => {
     const weather_info = await update_weather( new Date(), new Date(items.weather_info_datetime), items.weather_loc, items.weather_info);
-    if (!items.weather_info || !weather_info.sort().every((val, idx) => val === items.weather_info[idx]))
+    if (!items.weather_info || !weather_info.every((val, idx) => val.time === items.weather_info[idx].time))
       API.storage.sync.set({ weather_info: weather_info, weather_info_datetime:  new Date().getTime() }, () => {
         console.log("done");
       });
@@ -81,7 +84,6 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
   const weather_info = [], records = [];
 
   if (cur_date.getHours() === stored_date.getHours()) return prev_weather_info;
-
   console.log("current update datetime:", (new Date(cur_date - cur_date.getTimezoneOffset() * 60000)).toISOString());
 
   if (!config) {
@@ -115,6 +117,7 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
     if (res_json.cod === 200) {
       sunrise = new Date(res_json.sys.sunrise * 1000).getHours();
       sunset = new Date(res_json.sys.sunset * 1000).getHours();
+      res_json.dt = cur_date.getTime() / 1000;
       records.push(res_json);
     }
 
@@ -137,15 +140,14 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
       records.push(...res_json.list);
     } 
 
-    if (res_json.cod === "200") {
       const pty = [], tmp = [], pcp = [], pop = [], time = [];
-      
+
       let cnt = 0;
       for (const item of records) {
         time.push(new Date(item.dt * 1000).getHours());
 
         if (item.pop !== undefined)
-          pop.push(item.pop * 100);
+          pop.push(Math.floor(item.pop * 100));
         else
           pop.push(0);
 
@@ -170,7 +172,7 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
         cnt++;
         if (cnt >= n) break;
       }
-  
+
       for (let i = 0; i < cnt; i++) {
         weather_info.push({
           icon: `<img src="${get_icon_str((time[i] > sunrise && time[i] < sunset), pty[i])}">`,
@@ -181,11 +183,8 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
         });
       }
       if (cnt === 1) {
-        weather_info.push(...prev_weather_info);
+        weather_info.push(...prev_weather_info.slice(1));
       }
-
-      console.log("successfully updated weather info!");
-    }
 
     return weather_info;
 }

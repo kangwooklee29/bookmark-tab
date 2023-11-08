@@ -152,12 +152,18 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
         const celsius = item.main.temp - 273.15;
         tmp.push(celsius >= 0 ? Math.round(celsius) : Math.round(celsius * 10) / 10);
 
-        if (item.rain && ("1h" in item.rain || "3h" in item.rain))
-          pcp.push(Math.floor("1h" in item.rain ? item.rain["1h"] : item.rain["3h"] / 3));
-        else if (item.snow && ("1h" in item.snow || "3h" in item.snow))
-          pcp.push(Math.floor("1h" in item.snow ? item.snow["1h"] : item.snow["3h"] / 3));
-        else
-          pcp.push(0);
+        let cur_pcp = 0;
+        if (item.rain && ("1h" in item.rain || "3h" in item.rain)) {
+          cur_pcp = Math.floor("1h" in item.rain ? item.rain["1h"] : item.rain["3h"] / 3);
+          if ("3h" in item.rain && cur_pcp === 0)
+            cur_pcp = 1;
+        }
+        else if (item.snow && ("1h" in item.snow || "3h" in item.snow)) {
+          cur_pcp = Math.floor("1h" in item.snow ? item.snow["1h"] : item.snow["3h"] / 3);
+          if ("3h" in item.snow && cur_pcp === 0)
+            cur_pcp = 1;
+        }
+        pcp.push(cur_pcp);
 
         pty.push(item.weather[0].id); // 현재 눈/비 오는지. 비오면 5xx, 눈오면 60x or 62x, 눈비는 61x. 
 

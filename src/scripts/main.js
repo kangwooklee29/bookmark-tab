@@ -55,8 +55,10 @@ document.body.addEventListener("click", (e)=>
 document.body.addEventListener("mouseover", e => {
     if (e.target.parentNode.classList.contains("cell") && !e.target.contains(e.relatedTarget)) {
         const arrow_box = e.target.querySelector("p.arrow_box");
-        arrow_box.style.display = 'block';
-        e.target.style.height = `${80 + arrow_box.getBoundingClientRect().height}px`;
+        if (arrow_box) {
+            arrow_box.style.display = 'block';
+            e.target.style.height = `${80 + arrow_box.getBoundingClientRect().height}px`;
+        }
         cur_hover_elem = e.target;
         e.target.classList.add("now_hovering");
     }
@@ -66,7 +68,8 @@ document.body.addEventListener("mouseout", e => {
     // 현재 마우스 커서가 떠난 엘리먼트가 cur_hover_elem의 자식인 경우
     if (cur_hover_elem && cur_hover_elem.contains(e.target) && !cur_hover_elem.contains(e.relatedTarget)) {
         cur_hover_elem.style.height = `110px`;
-        cur_hover_elem.querySelector("p.arrow_box").style.display = 'none';
+        if (cur_hover_elem.querySelector("p.arrow_box"))
+            cur_hover_elem.querySelector("p.arrow_box").style.display = 'none';
         cur_hover_elem.classList.remove("now_hovering");
         cur_hover_elem = null;
     }

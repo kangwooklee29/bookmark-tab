@@ -115,7 +115,7 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
     if (!res_json) { console.error('Failed to fetch weather info'); return; }
 
     let sunrise, sunset;
-    if (res_json.cod === 200 && cur_date.getHours() % 3 !== 0) {
+    if (res_json.cod === 200) {
       sunrise = new Date(res_json.sys.sunrise * 1000).getHours();
       sunset = new Date(res_json.sys.sunset * 1000).getHours();
       records.push(res_json);

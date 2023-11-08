@@ -8,7 +8,7 @@ You can view your bookmarks on the new tab page of your browser, and easily rear
 
 ## Permissions
 - Bookmark Data: We collect information related to the bookmarks you save. This data is processed solely on your device.
-- Geolocation Data: We collect information related to your geolocation to offer weather forecast information. While the initial calculation is done on your device, the information is transmitted to [OpenWeatherMap](https://openweathermap.org/) API to provide the service.
+- Geolocation Data: We collect information related to your geolocation to offer weather forecast information. Your location is approximated to within about 10 km to protect your privacy. While this calculation is done on your device, the information is transmitted to [OpenWeatherMap](https://openweathermap.org/) API to provide the service.
 
 ## Screenshots
 <img width="640" src="https://github.com/kangwooklee29/bookmark-tab/assets/141019638/0ca88144-3b4c-425e-96a2-650d9c0bf189">

@@ -93,10 +93,11 @@ div.cell div { /* 마우스 커서 hover 시 배경색이 바뀌는 영역. 안�
     width: 110px;
     height: 110px;
     flex-direction: column;
+    background-color: #fff;
+    z-index: 0;
 }
 
 div.cell div:hover{
-    box-shadow: 0 0 4px #777;
     cursor: pointer;
 }
 
@@ -334,7 +335,7 @@ div.logo {
 
 .now_hovering {
     position: absolute;
-    background-color: #fff;
     top: 0px;
-    z-index:10000;
+    z-index:10000 !important;
+    box-shadow: 0 0 4px #777;
 }

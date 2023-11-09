@@ -291,6 +291,7 @@ document.body.addEventListener("dragstart", (e) =>{
         })
         e.target.style.opacity = 0.01;
         e.target.classList.add("not_hover");
+        cur_hover_elem.classList.remove("now_hovering");
     }
 });
 

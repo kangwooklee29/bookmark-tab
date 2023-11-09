@@ -1,21 +1,23 @@
 let API =  (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 
-async function run_weather(weatherInfo) {
+async function displayWeather(weatherInfo) {
     const table = document.getElementById('weatherTable');
+    table.innerHTML = '';
 
     // Time row with 'sepa' class
     const timeRow = document.createElement('tr');
     timeRow.className = 'time';
     const timeCell = document.createElement('td');
-    timeCell.colSpan = weatherInfo.length;
+    timeCell.colSpan = 10;
 
     const timeDiv = document.createElement('div');
     weatherInfo.forEach((info, index) => {
+      if (index === 10) return;
       const timeDivChild = document.createElement('div');
       timeDivChild.innerHTML = info.time;
       timeDiv.appendChild(timeDivChild);
 
-      if (index !== weatherInfo.length - 1) {
+      if (index !== 9) {
         const sepaDiv = document.createElement('div');
         sepaDiv.className = 'sepa';
         sepaDiv.innerHTML = '&nbsp;';
@@ -29,7 +31,8 @@ async function run_weather(weatherInfo) {
     // Create and append other rows (icon, pop, pcp, tmp)
     ['icon', 'pop', 'pcp', 'tmp'].forEach(key => {
       const row = document.createElement('tr');
-      weatherInfo.forEach(info => {
+      weatherInfo.forEach((info, index) => {
+        if (index === 10) return;
         const cell = document.createElement('td');
         cell.innerHTML = info[key];
         if (key === 'pcp') {
@@ -68,7 +71,7 @@ function fetch_and_run(weather_loc) {
   API.runtime.sendMessage( {greeting: "fetchWeather", weather_loc: {latitude: weather_loc.latitude, longitude: weather_loc.longitude}}, function(response) {
     console.log("Response:", response);
     API.storage.sync.get(['weather_info'], async (items) => {
-      run_weather(items.weather_info);
+      displayWeather(items.weather_info);
     });
   });
 }

@@ -6,30 +6,28 @@
   </head>
   <body>
     <main>
-        <h1>Bookmark Tab Options</h1>
-        <div id="location_consent">
-          <label>Ask Location Consent</label>
-          <item>
-            <div>
-              <div><button>Click to ask</button></div>
-            </div>
-          </item>
+      <h1>Bookmark Tab Options</h1>
+      <div id="location_consent">
+        <label for="location_consent_button" data-i18n="location_consent">Ask Location Consent</label>
+        <div>
+          <button id="location_consent_button" data-i18n="click_to_ask">Click to ask</button>
+        </div>
       </div>
       <div id="weather_visibility">
-            <label>Weather Visibility</label>
-            <item>
-              <input type="checkbox" id="weather_visibility_checkbox" name="weather_visibility">
-            </item>
+        <label for="weather_visibility_checkbox" data-i18n="weather_visibility">Weather Visibility</label>
+        <div>
+          <input type="checkbox" id="weather_visibility_checkbox" name="weather_visibility">
         </div>
-        <div id="restore_backup">
-            <label>Restore Back-up</label>
-            <item>
-                <textarea rows="5"></textarea>
-                <div>
-                    <button>RESTORE</button>
-                </div>
-        </item>
+      </div>
+      <div id="restore_backup">
+        <label for="backup_textarea" data-i18n="restore_backup">Restore Back-up</label>
+        <div>
+          <textarea id="backup_textarea" rows="5"></textarea>
+          <div>
+            <button data-i18n="restore">RESTORE</button>
+          </div>
         </div>
+      </div>
     </main>
     <script src="../scripts/options.js"></script>
   </body>

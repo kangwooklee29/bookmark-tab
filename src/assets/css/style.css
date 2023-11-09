@@ -139,9 +139,10 @@ div:hover > p.arrow_box {
 
 p.icon_title{
     position: absolute;
-    top: 55px;
-    padding: 5px;
+    top: 60px;
     z-index: -1;
+    max-width: 80px;
+    height: 30px;
 }
 
 

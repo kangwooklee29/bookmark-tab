@@ -21,53 +21,10 @@ h1 {
     height: 100px;
 }
 
-main label {
+main > div > label {
     width: 30%;
 }
 
-main item {
+main > div > div {
     width: 70%;
-}
-
-#weather_location item {
-    flex-direction: column;
-}
-
-#weather_location input {
-    width: 242px;
-}
-
-#weather_location button {
-    width: 42px;
-}
-
-#weather_location select {
-    width: 250px;
-}
-
-#weather_location span.selected_label {
-    justify-content: left;
-    width: 40px;
-}
-
-#weather_location span.selected_address {
-    justify-content: left;
-    padding-left: 8px;
-    width: 160px;
-}
-
-main.setup > h1{
-    display: none;
-}
-
-main.setup > div {
-    width: 100%;    
-}
-
-main.setup > #weather_visibility {
-    min-height: 20px;
-}
-
-main.loading, main.loading * {
-    display: none;
 }

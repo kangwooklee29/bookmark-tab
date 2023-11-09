@@ -67,7 +67,7 @@ document.body.addEventListener("mouseover", e => {
 document.body.addEventListener("mouseout", e => {
     // 현재 마우스 커서가 떠난 엘리먼트가 cur_hover_elem의 자식인 경우
     if (cur_hover_elem && cur_hover_elem.contains(e.target) && !cur_hover_elem.contains(e.relatedTarget)) {
-        cur_hover_elem.style.height = `110px`;
+        cur_hover_elem.style.height = `120px`;
         if (cur_hover_elem.querySelector("p.arrow_box"))
             cur_hover_elem.querySelector("p.arrow_box").style.display = 'none';
         cur_hover_elem.classList.remove("now_hovering");

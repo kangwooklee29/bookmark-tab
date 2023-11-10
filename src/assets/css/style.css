@@ -335,7 +335,6 @@ div.logo {
 }
 
 .now_hovering {
-    position: absolute;
     top: 0px;
     z-index:10000 !important;
     box-shadow: 0 0 4px #777;

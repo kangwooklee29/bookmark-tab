@@ -342,15 +342,6 @@ div.logo {
     z-index:10000 !important;
 }
 
-.main-board {
-    width: 750px;
-    margin-bottom: 50px;
-}
-
-.main-board.with-color {
-    box-shadow: 0 0 4px #777;
-    border-radius: 0 0 25px 25px;
-}
 
 .bookmark-search {
     border-radius: 18px;
@@ -368,6 +359,70 @@ div.logo {
 }
 
 input[type="text"]:focus {
-    outline: none; /* 기본 아웃라인을 제거합니다 */
-    border: none; /* 기본 테두리를 제거합니다 */
+    outline: none;
+    border: none;
+}
+
+.modify-theme-wrapper {
+    box-shadow: 0 3px 6px rgba(0,0,0,.16), 0 1px 2px rgba(0,0,0,.23);
+    border-radius: 50%;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+}
+
+.modify-theme-wrapper button {
+    padding: 0px;
+    border: 0px;
+    background-color: transparent;
+    width: 32px;
+    height: 32px;
+}
+
+.modify-theme-wrapper button:hover {
+    background-color: rgba(0,0,0,.23);
+}
+
+.modify-theme-wrapper img {
+    width: 16px;
+    height: 16px;
+}
+
+.modify-theme-wrapper.open-box {
+    width: 250px;
+    height: 200px;
+    border-radius: 5px;
+}
+
+.modify-theme-box {
+    display: none;
+    position: absolute;
+    top: 0px;
+}
+
+.modify-theme-box div {
+    justify-content: flex-start;
+}
+
+.modify-theme-box label {
+    width: 120px;
+}
+
+.modify-theme-box div {
+    margin: 5px;
+}
+
+.modify-theme-box #fileViewer {
+    background-color: #eee;
+    padding: 5px;
+    width: 100px;
+    font-size: 9pt;
+    justify-content: center;
+}
+
+.modify-theme-box #colorPicker {
+    width: 80px;
+    margin-left: 15px;
 }

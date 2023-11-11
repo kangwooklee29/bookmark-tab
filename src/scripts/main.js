@@ -1,7 +1,30 @@
+import CP from "./color-picker.js";
+
+const picker = new CP(document.querySelector('#colorPicker'));
+picker.on('change', function (r, g, b, a) {
+    if (1 === a) {
+        this.source.value = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+    } else {
+        this.source.value = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
+    }
+});
+
 let cur_hover_elem = null;
 
 document.body.addEventListener("click", (e)=>
 {
+    if (document.querySelector("div.modify-theme-wrapper button").contains(e.target)) {
+        document.querySelector("div.modify-theme-wrapper button").style.display = 'none';
+        document.querySelector("div.modify-theme-wrapper").classList.add("open-box");
+        document.querySelector("div.modify-theme-wrapper div").style.display = 'block';
+    } 
+
+    if (!document.querySelector("div.modify-theme-wrapper").contains(e.target) && (!document.querySelector("div.color-picker__dialog") || !document.querySelector("div.color-picker__dialog").contains(e.target))) {
+        document.querySelector("div.modify-theme-wrapper").classList.remove("open-box");
+        document.querySelector("div.modify-theme-wrapper div").style.display = 'none';
+        document.querySelector("div.modify-theme-wrapper button").style.display = 'block';
+    }
+
     if (e.target.nodeName === "SPAN" && e.target.parentNode.classList.contains("weather_info"))
     {
         var target = document.querySelector("iframe");
@@ -11,7 +34,7 @@ document.body.addEventListener("click", (e)=>
             target.classList.remove("widen");
     }
 
-    if (e.target.nodeName === "DIV" && e.target.id !== "" && e.target.id !== "overlay")
+    if (e.target.nodeName === "DIV" && e.target.id !== "" && e.target.id !== "overlay" && e.target.id !== "colorViewer" && e.target.id !== "fileViewer")
     {
         if (e.target.querySelector("a"))
             window.location.href = e.target.querySelector("a").href;
@@ -532,4 +555,3 @@ document.querySelector('#memo').textContent = chrome.i18n.getMessage("memo");
 document.querySelector('.delete').textContent = chrome.i18n.getMessage("delete");
 document.querySelector('.cancel').textContent = chrome.i18n.getMessage("cancel");
 document.querySelector('.confirm').textContent = chrome.i18n.getMessage("confirm");
-

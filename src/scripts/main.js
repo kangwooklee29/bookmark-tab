@@ -57,7 +57,7 @@ document.body.addEventListener("mouseover", e => {
         const arrow_box = e.target.querySelector("p.arrow_box");
         if (arrow_box) {
             arrow_box.style.display = 'block';
-            e.target.style.height = `${80 + arrow_box.getBoundingClientRect().height}px`;
+            e.target.style.height = `${70 + arrow_box.getBoundingClientRect().height}px`;
         }
         cur_hover_elem = e.target;
         e.target.classList.add("now_hovering");

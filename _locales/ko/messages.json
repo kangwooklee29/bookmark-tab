@@ -13,5 +13,6 @@
     "save": { "message": "저장" },
     "restore": { "message": "복구" },
     "restore_backup": { "message": "복구 백업" },
-    "click_to_ask": { "message": "클릭"}
+    "click_to_ask": { "message": "클릭"},
+    "search_bookmarks": { "message": "북마크를 검색하세요"}
 }

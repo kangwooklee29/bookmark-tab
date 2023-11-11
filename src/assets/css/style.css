@@ -12,6 +12,7 @@ body, main, div, h1 {
 
 body {
     flex-direction: column;
+    margin-top: 0px;
 }
 
 .header-container {
@@ -45,7 +46,7 @@ h1{
     font-weight: 200;
     font-size: 12pt; 
     margin-top: 20px;
-    margin-left: 155px;
+    margin-left: 115px;
     padding: 5px;
     white-space: nowrap;
     vertical-align: middle;
@@ -99,6 +100,8 @@ div.cell div { /* 마우스 커서 hover 시 배경색이 바뀌는 영역. 안�
 
 div.cell div:hover{
     cursor: pointer;
+    background-color: #ddd;
+    border-radius: 5px;
 }
 
 .mod_button {
@@ -119,7 +122,7 @@ div:hover > p.mod_button {
 
 
 .mod_button:hover {
-    background-color: #ddd;
+    background-color: #fff;
 }
 
 .arrow_box {
@@ -129,7 +132,7 @@ div:hover > p.mod_button {
     width: 90px;
     padding: 5px;
     z-index:10000;
-    background: #fff;
+    background-color: inherit;
     word-break: break-all;
 }
   
@@ -337,5 +340,34 @@ div.logo {
 .now_hovering {
     top: 0px;
     z-index:10000 !important;
+}
+
+.main-board {
+    width: 750px;
+    margin-bottom: 50px;
+}
+
+.main-board.with-color {
     box-shadow: 0 0 4px #777;
+    border-radius: 0 0 25px 25px;
+}
+
+.bookmark-search {
+    border-radius: 18px;
+    background-color: #f8f8f8;
+    height: 40px;
+    width: 250px;
+    margin-top: 20px;
+    margin-left: 5px;
+}
+
+.bookmark-search input {
+    border: 0px;
+    background-color: inherit;
+    width: 80%;
+}
+
+input[type="text"]:focus {
+    outline: none; /* 기본 아웃라인을 제거합니다 */
+    border: none; /* 기본 테두리를 제거합니다 */
 }

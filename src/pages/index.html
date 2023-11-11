@@ -7,10 +7,11 @@
   <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
 </head>
 <body>
+  <div class="main-board with-color">
   <div class="weather_info"><iframe scrolling="no"></iframe></div>
   <div class="header-container">
     <a href="https://kangwooklee29.github.io/bookmark-tab"><img src="../assets/img/logo.png"></a>
-    <h1>Bookmark Tab</h1>
+    <div class="bookmark-search"><input type=text></div>
     <span class="current-time"></span>
   </div>
   <div class="folder_list"></div>
@@ -37,6 +38,26 @@
     </div>
   </div>
   <div class="logo"></div>
+  <div class="modify-theme-wrapper">
+    <button class="modify-theme-button"></button>
+    <div class="modify-theme-box">
+      <a href=chrome://settings/manageProfile?search=color">Pick a theme color</a>
+    </div>
+  </div>
+  </div>
   <script src="../scripts/main.js"></script>
 </body>
 </html>
+
+<!--
+
+개발 단계
+
+1. modify-theme에 들어가는 수정 버튼 만들기
+2. modify-theme 수정버튼 누르면  링크 텍스트 넣고. 색깔 수정 넣고. 배경사진 넣을 수 있는 창 넣고.
+3. 색깔 있으면 with-color 클래스 main-board에 추가. 이때 main-board의 배경은 약간 투명하게. 그리고 결국 아이콘은 거의 불투명 흰색배경까지..
+4. search-bookmark placeholder 넣기
+5. search-bookmark 값 변경될 때마다 bookmark에서 검색해서 목록 뽑기. 폴더는 다 보여줘야 하고, 이때 아이콘 드래그앤드롭은 안되는데 폴더에 넣는건 됨. 검색어 입력 시 날씨 화면 사라짐. 
+6. search-bookmark 배경색 적절히 변경되야됨
+
+-->

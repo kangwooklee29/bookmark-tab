@@ -19,7 +19,6 @@ body {
     justify-content: flex-start; 
     text-align: left;
     flex-wrap: nowrap; 
-    border-bottom: 1px solid #ccc;
     padding-left: 10px;
     height:100px;
     width: 600px;
@@ -353,11 +352,12 @@ div.logo {
 
 .bookmark-search {
     border-radius: 18px;
-    background-color: #f8f8f8;
+    background-color: #fff;
     height: 40px;
     width: 250px;
     margin-top: 20px;
     margin-left: 5px;
+    box-shadow: 0 1px 6px #20212447;
 }
 
 .bookmark-search input {

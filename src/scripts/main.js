@@ -12,12 +12,13 @@ let cur_hover_elem = null;
 let debounceTimer = null;
 
 function calcIconWrapperColor(color) {
+    if (!color) return "rgba(0, 0, 0, 0.1)";
     let ov = color.match(/[\d.]+/g).map(Number);
     const mod = ov.map(value => {
-        let normalizedValue = value / Math.max(...ov) / 1.05;
+        let normalizedValue = value / Math.max(...ov);
         let angle = Math.asin(normalizedValue); 
         let newAngle = angle - 0.24;
-        return Math.sin(newAngle) * Math.max(...ov) * 1.05;
+        return Math.pow(Math.sin(newAngle), 1) * Math.max(...ov) ;
     });
     return `rgb(${mod[0]}, ${mod[1]}, ${mod[2]})`;
 }
@@ -57,6 +58,7 @@ observer.observe(document.querySelector("main"), { childList: true, subtree: tru
 
 
 function blendColors(background, overlay) {
+    if (!background) background = "rgb(255, 255, 255)";
     let bg = background.match(/\d+/g).map(Number);
     let ov = overlay.match(/[\d.]+/g).map(Number);
 
@@ -626,8 +628,10 @@ setInterval(updateCurTime, 1000 * 60);
 API.storage.sync.get(['backgroundColor'], items => {
     document.querySelector("#colorPicker").value = items.backgroundColor;
     updateBackgroundColor(items.backgroundColor);
-    var [r, g, b] = items.backgroundColor.match(/\d+/g).map(Number);
-    picker.set(r, g, b, 1);
+    if (items.backgroundColor) {
+        var [r, g, b] = items.backgroundColor.match(/\d+/g).map(Number);
+        picker.set(r, g, b, 1);
+    }
 });
 
 API.storage.local.get('backgroundImage', function(result) {

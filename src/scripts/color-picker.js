@@ -576,8 +576,8 @@
                     selfLeft = toEdge(selfLeft, [minX, maxX]) >> 0;
                     selfTop = toEdge(selfTop, [minY, maxY]) >> 0;
                 }
-                setStyle(self, 'left', selfLeft);
-                setStyle(self, 'top', selfTop);
+                // setStyle(self, 'left', selfLeft);
+                // setStyle(self, 'top', selfTop);
                 return fire('fit', theColor);
             };
             doResize = function doResize() {

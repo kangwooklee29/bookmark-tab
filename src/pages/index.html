@@ -43,6 +43,20 @@
     <div class="modify-theme-box">
       <div><label for="fileViewer">Background img</label><div id="fileViewer">Click to upload</div><input type="file" id="fileInput" style="display:none;"></div>
       <div><label for="colorPicker">Background color</label><input type="text" id="colorPicker"></div>
+      <div class="color-example">
+        <div style="background-color: #fff; border: 1px solid rgb(217, 218, 223); "></div>
+        <div style="background-color: rgb(217, 218, 223);"></div>
+        <div style="background-color: rgb(68, 87, 96);"></div>
+        <div style="background-color: rgb(53, 53, 53);"></div>
+        <div style="background-color: rgb(160, 20, 79);"></div>
+        <div style="background-color: rgb(4, 91, 98);"></div>
+        <div style="background-color: rgb(20, 83, 154);"></div>
+        <div style="background-color: rgb(109, 65, 161);"></div>
+        <div style="background-color: rgb(255, 224, 230);"></div>
+        <div style="background-color: rgb(196, 225, 197);"></div>
+        <div style="background-color: rgb(183, 225, 228);"></div>
+        <div style="background-color: rgb(203, 220, 247);"></div>
+      </div>
     </div>
   </div>
   <script type="module" src="../scripts/main.js"></script>
@@ -53,15 +67,11 @@
 
 개발 단계
 
-1. modify-theme-box의 fileViewer 클릭/fileInput 변경 이벤트, colorPicker 클릭/값 변경 이벤트 구현하기
 2. index.html에 data-18i 속성 쓰고 main.js에 관련 구현 하기
-3. 여러 색깔로 테스트해서 전체적인 엘리먼트들 적절한 색깔 결정하기
-4. 메인 아이콘 우상단 편집버튼 border-radisu 50% 하고 위치 적절히 조정하기
-5. 메인 아이콘 크기 24px - 48px.
+3. 여러 색깔로 테스트해서 전체적인 엘리먼트들 적절한 색깔 결정하기. 각 배경색에 따른 적절한 폰트 컬러만 선택하면 디자인적으로는 완성될 듯. 
 6. search-bookmark placeholder 넣기
 7. search-bookmark 값 변경될 때마다 bookmark에서 검색해서 목록 뽑기. 폴더는 다 보여줘야 하고, 이때 아이콘 드래그앤드롭은 안되는데 폴더에 넣는건 됨. 검색어 입력 시 날씨 화면 사라짐. 
 8. search-bookmark 배경색 적절히 변경되야됨
-9. 메인 시계 업데이트
 10. 날씨 엘리먼트
 
 -->

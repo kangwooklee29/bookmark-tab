@@ -10,7 +10,7 @@
 :root {
     --color-color-picker__controls: #000;
     --fill-color-picker__controls: 0 0;
-    --height-color-picker__controls: 10em;
+    --height-color-picker__controls: 7em;
     --shadow-color-picker__dialog: 1px 3px 6px rgba(0, 0, 0, .5);
     --size-color-picker__controls: 12px;
     --stroke-color-picker__controls: #000;
@@ -49,6 +49,7 @@
   }
   .color-picker__control--a {
     width: var(--width-color-picker__control--a);
+    display: none;
   }
   .color-picker__control--a div {
     z-index: 2;
@@ -88,9 +89,6 @@
     overflow: hidden;
   }
   
-  .color-picker__dialog {
-    box-shadow: var(--shadow-color-picker__dialog);
-  }
   .color-picker__dialog,
   .color-picker__dialog::before,
   .color-picker__dialog::after,
@@ -102,9 +100,9 @@
   }
   
   .color-picker__dialog {
-    left: 0;
+    right: 60px;
     position: fixed;
-    top: 0;
+    bottom: 35px;
     z-index: 9999;
   }
   

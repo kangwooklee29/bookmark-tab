@@ -2,27 +2,98 @@ import CP from "./color-picker.js";
 
 const picker = new CP(document.querySelector('#colorPicker'));
 picker.on('change', function (r, g, b, a) {
-    if (1 === a) {
-        this.source.value = 'rgb(' + r + ', ' + g + ', ' + b + ')';
-    } else {
-        this.source.value = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
-    }
+    if (r === 0 && g === 0 && b === 0) return;
+    this.source.value = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+    updateBackgroundColor(this.source.value);
 });
 
 let cur_hover_elem = null;
 
+let debounceTimer = null;
+
+function calcIconWrapperColor(color) {
+    let ov = color.match(/[\d.]+/g).map(Number);
+    const mod = ov.map(value => {
+        let normalizedValue = value / Math.max(...ov) / 1.05;
+        let angle = Math.asin(normalizedValue); 
+        let newAngle = angle - 0.24;
+        return Math.sin(newAngle) * Math.max(...ov) * 1.05;
+    });
+    return `rgb(${mod[0]}, ${mod[1]}, ${mod[2]})`;
+}
+
+function updateBackgroundColor(color) {
+    document.body.style.backgroundColor = color;
+    document.body.style.backgroundImage = "";
+    document.querySelector("#colorPicker").value = color;
+    document.querySelector(".mod_box").style.backgroundColor = color;
+    document.querySelector(".modify-theme-wrapper").style.backgroundColor = color;
+
+
+    document.querySelectorAll("div.cell a").forEach(elem=> {elem.style.backgroundColor = calcIconWrapperColor(color)});
+
+    if (debounceTimer)
+        clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        API.storage.sync.set({backgroundColor: color});
+        API.storage.local.set({ 'backgroundImage': "" });
+    }, 300);
+}
+
+const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+        if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach(node => {
+                const aNode = node.querySelector("a");
+                if (aNode) {
+                    aNode.style.backgroundColor = calcIconWrapperColor(document.body.style.backgroundColor);
+                }
+            });
+        }
+    });
+});
+
+observer.observe(document.querySelector("main"), { childList: true, subtree: true });
+
+
+function blendColors(background, overlay) {
+    let bg = background.match(/\d+/g).map(Number);
+    let ov = overlay.match(/[\d.]+/g).map(Number);
+
+    let newR = bg[0] * (1 - ov[3]) + ov[0] * ov[3];
+    let newG = bg[1] * (1 - ov[3]) + ov[1] * ov[3];
+    let newB = bg[2] * (1 - ov[3]) + ov[2] * ov[3];
+
+    return `rgba(${Math.round(newR)}, ${Math.round(newG)}, ${Math.round(newB)}, 1)`;
+}
+
+document.querySelector("#colorPicker").addEventListener("input", e => { 
+    document.querySelector("#colorPicker").value = e.target.value;
+    var [r, g, b] = e.target.value.match(/\d+/g).map(Number);
+    picker.set(r, g, b, 1);
+});
+
 document.body.addEventListener("click", (e)=>
 {
+    if (e.target === document.querySelector("#fileViewer"))
+        document.getElementById('fileInput').click();
+
     if (document.querySelector("div.modify-theme-wrapper button").contains(e.target)) {
         document.querySelector("div.modify-theme-wrapper button").style.display = 'none';
         document.querySelector("div.modify-theme-wrapper").classList.add("open-box");
         document.querySelector("div.modify-theme-wrapper div").style.display = 'block';
+        document.querySelector("div.modify-theme-wrapper #colorPicker").dispatchEvent(new MouseEvent('mousedown'));
     } 
 
     if (!document.querySelector("div.modify-theme-wrapper").contains(e.target) && (!document.querySelector("div.color-picker__dialog") || !document.querySelector("div.color-picker__dialog").contains(e.target))) {
         document.querySelector("div.modify-theme-wrapper").classList.remove("open-box");
         document.querySelector("div.modify-theme-wrapper div").style.display = 'none';
         document.querySelector("div.modify-theme-wrapper button").style.display = 'block';
+    }
+
+    if (document.querySelector("div.color-example").contains(e.target)) {
+        if (e.target.style.backgroundColor)
+            updateBackgroundColor(e.target.style.backgroundColor);
     }
 
     if (e.target.nodeName === "SPAN" && e.target.parentNode.classList.contains("weather_info"))
@@ -80,10 +151,14 @@ document.body.addEventListener("mouseover", e => {
         const arrow_box = e.target.querySelector("p.arrow_box");
         if (arrow_box) {
             arrow_box.style.display = 'block';
-            e.target.style.height = `${70 + arrow_box.getBoundingClientRect().height}px`;
+            let calcHeight = 70 + arrow_box.getBoundingClientRect().height;
+            if (calcHeight < 112) calcHeight = 112;
+            e.target.style.height = `${calcHeight}px`;
+            e.target.querySelector("p.icon_title").style.display = 'none';
         }
         cur_hover_elem = e.target;
         e.target.classList.add("now_hovering");
+        e.target.style.backgroundColor = blendColors(document.body.style.backgroundColor, "rgba(32, 33, 36, 0.1)");
     }
 });
 
@@ -91,9 +166,12 @@ document.body.addEventListener("mouseout", e => {
     // 현재 마우스 커서가 떠난 엘리먼트가 cur_hover_elem의 자식인 경우
     if (cur_hover_elem && cur_hover_elem.contains(e.target) && !cur_hover_elem.contains(e.relatedTarget)) {
         cur_hover_elem.style.height = `120px`;
-        if (cur_hover_elem.querySelector("p.arrow_box"))
+        if (cur_hover_elem.querySelector("p.arrow_box")) {
             cur_hover_elem.querySelector("p.arrow_box").style.display = 'none';
+            cur_hover_elem.querySelector("p.icon_title").style.display = 'block';
+        }
         cur_hover_elem.classList.remove("now_hovering");
+        cur_hover_elem.style.backgroundColor = "";
         cur_hover_elem = null;
     }
 });
@@ -242,11 +320,6 @@ function img_onload(e)
         {
             e.target.src = new_url;
             document.querySelector(`a[href='${e.target.id}']`).innerHTML = `<img src="${new_url}" draggable="false">`; 
-            const img_elem = document.querySelector(`a[href='${e.target.id}'] > img`);
-            img_elem.onload = () => {
-                if (img_elem.naturalWidth < 30)
-                    img_elem.classList.add("favicon-25");
-            };
             e.target.onload = null;
         }
         else
@@ -537,14 +610,43 @@ var initial_folder_id;
 var main = new Main(document.querySelector("main"));
 var mod_box = new ModBox(document.querySelector("div.mod_box"));
 
-document.querySelector('span.current-time').textContent = new Date().toLocaleString('en-US', {
-    month: 'numeric',
-    day: 'numeric',
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-  
+function updateCurTime() {
+    document.querySelector('span.current-time').textContent = new Date().toLocaleString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+updateCurTime();
+setInterval(updateCurTime, 1000 * 60);
+
+API.storage.sync.get(['backgroundColor'], items => {
+    document.querySelector("#colorPicker").value = items.backgroundColor;
+    updateBackgroundColor(items.backgroundColor);
+    var [r, g, b] = items.backgroundColor.match(/\d+/g).map(Number);
+    picker.set(r, g, b, 1);
+});
+
+API.storage.local.get('backgroundImage', function(result) {
+    if (result.backgroundImage) {
+        document.body.style.backgroundImage = 'url(' + result.backgroundImage + ')';
+    }
+});
+
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    var file = event.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        chrome.storage.local.set({ 'backgroundImage': e.target.result }, function() {
+            document.body.style.backgroundImage = 'url(' + e.target.result + ')';
+        });
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('fileViewer').innerText = document.getElementById('fileInput').files[0].name;
+});
 
 document.querySelector('title').textContent = chrome.i18n.getMessage("newtab_title");
 document.querySelector('.new_folder').textContent = chrome.i18n.getMessage("new_folder");

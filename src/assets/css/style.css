@@ -71,19 +71,29 @@ div.folder_list span{
 
 
 main{
-    width:600px;
+    width:610px;
+}
+
+div.cell a {
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+}
+
+div.cell img {
+    top: 12px;
 }
 
 img{
-    width:40px;
-    height:40px;
+    width:24px;
+    height:24px;
     z-index: 10;
     position: relative;
 }
 
 div.cell{
-    width:100px;
-    height:100px;
+    width:112px;
+    height:112px;
     margin-bottom: 30px;
     padding: 5px;
     position: relative;
@@ -91,16 +101,14 @@ div.cell{
 
 
 div.cell div { /* 마우스 커서 hover 시 배경색이 바뀌는 영역. 안에 img 노드, 텍스트 노드가 들어있다. */
-    width: 110px;
-    height: 110px;
+    width: 112px;
+    height: 112px;
     flex-direction: column;
-    background-color: #fff;
     z-index: 0;
 }
 
 div.cell div:hover{
     cursor: pointer;
-    background-color: #ddd;
     border-radius: 5px;
 }
 
@@ -108,12 +116,13 @@ div.cell div:hover{
     display: none;
     font-size:5pt;
     position: absolute;
-    top:-2px;
-    right: 5px;
-    width:15px;
-    height:12px;
-    padding-top: 3px;
+    top:3px;
+    right: 10px;
+    width:19px;
+    height:14px;
+    padding-top: 6px;
     color:#777;
+    border-radius: 50%;
 }
 
 div:hover > p.mod_button {
@@ -122,7 +131,7 @@ div:hover > p.mod_button {
 
 
 .mod_button:hover {
-    background-color: #fff;
+    background-color: rgb(0, 0, 0, 0.1);
 }
 
 .arrow_box {
@@ -132,7 +141,6 @@ div:hover > p.mod_button {
     width: 90px;
     padding: 5px;
     z-index:10000;
-    background-color: inherit;
     word-break: break-all;
 }
   
@@ -252,22 +260,22 @@ div.cell button.icon {
 button.folder_deco{
     position: absolute;
     width: 10px;
-    height: 5px;
+    height: 3px;
     top:18px;
-    left:40px;
-    background-color: #999;
+    left:44px;
+    background-color: rgba(0, 0, 0, 0.5);
     border: 0px;
     border-radius: 10px;
 }
 
 button.folder{
-    border: 1px solid #ccc;
+    border: 0px;
     border-radius: 5px;
     position: absolute;
     width: 40px;
     height: 33px;
     top:20px;
-    background-color: #ccc;
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 
@@ -364,8 +372,6 @@ input[type="text"]:focus {
 }
 
 .modify-theme-wrapper {
-    box-shadow: 0 3px 6px rgba(0,0,0,.16), 0 1px 2px rgba(0,0,0,.23);
-    border-radius: 50%;
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -374,6 +380,8 @@ input[type="text"]:focus {
 }
 
 .modify-theme-wrapper button {
+    border-radius: 50%;
+    box-shadow: 0 3px 6px rgba(0,0,0,.16), 0 1px 2px rgba(0,0,0,.23);
     padding: 0px;
     border: 0px;
     background-color: transparent;
@@ -391,9 +399,11 @@ input[type="text"]:focus {
 }
 
 .modify-theme-wrapper.open-box {
+    box-shadow: 0 3px 6px rgba(0,0,0,.16), 0 1px 2px rgba(0,0,0,.23);
     width: 250px;
-    height: 200px;
+    height: 270px;
     border-radius: 5px;
+    background-color: rgb(255,255,255,0.9);
 }
 
 .modify-theme-box {
@@ -423,6 +433,15 @@ input[type="text"]:focus {
 }
 
 .modify-theme-box #colorPicker {
-    width: 80px;
-    margin-left: 15px;
+    width: 105px;
+    margin-left: 5px;
+    border: 1px solid black;
+    text-align: center;
+    font-size: 9pt;
+}
+
+div.color-example div {
+    border-radius: 50%;
+    height: 27px;
+    width: 27px;
 }

@@ -186,7 +186,7 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
         });
       }
       if (cnt === 1) {
-        if (cur_date.getHours() % 3 == 0)
+        if (stored_date.getHours() % 3 == 0)
           weather_info.push(...prev_weather_info.slice(2));
         else
           weather_info.push(...prev_weather_info.slice(1));

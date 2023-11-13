@@ -469,7 +469,10 @@ document.body.addEventListener("dragenter", (e) => {
                 if (elem === e.target.parentNode)
                     temp = i;
             });
-            if (now_dragging === temp) return;
+            if (now_dragging === temp) {
+                folder_selected = null;
+                return;
+            }
             else
             {
                 var temp2 = null;

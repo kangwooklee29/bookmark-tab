@@ -318,7 +318,7 @@ class Main{
         const keyword = document.querySelector("div.bookmark-search input").value;
         API.bookmarks.getChildren(id, async (b) => {
             for (var e of b) {
-                if (!keyword || e.title.includes(keyword) || (e.url && e.url.includes(keyword)) || !('url' in e) || !e.url) {
+                if (!keyword || e.title.toLowerCase().includes(keyword.toLowerCase()) || (e.url && e.url.toLowerCase().includes(keyword.toLowerCase())) || !('url' in e) || !e.url) {
                     var cell = new Cell();
                     var icon  = ('url' in e && e.url) ? new Icon(e) : new FolderIcon(e);
                     cell.put_innerHTML(await icon.get_innerHTML());

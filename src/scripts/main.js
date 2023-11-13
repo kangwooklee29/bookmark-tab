@@ -405,9 +405,10 @@ class FolderIcon {
 
     async get_innerHTML()
     {
+        const isKeyword = document.querySelector("div.bookmark-search input").value;
         return new Promise((resolve, reject) => {
             API.bookmarks.getChildren(this.id, (b)=>{
-                var numbers = `(${b.length})`;
+                var numbers = `(${isKeyword ? "≤" : ""}${b.length})`;
                 var title = (this.title + numbers).length > 10 ? this.title.substring(0,7 - numbers.length) + "...": this.title;
                 this.title += this.id in main.memos ? "<br>" + main.memos[this.id] : "";
                 resolve(`<div id="${this.id}" draggable="true"><p class="mod_button">=</p><button class="folder_deco"></button><button class="folder"></button><span style="padding:12px;">&nbsp;</span><br><p class="icon_title">${title} <font class="numbers">${numbers}</font></p><p class="arrow_box">${this.title}</p></div>`);

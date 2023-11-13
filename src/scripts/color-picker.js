@@ -526,7 +526,7 @@
             // Refresh data
             theData = RGB2HSV(theColor = getValue());
             if (!isFirst) {
-                setChildLast(toParent || B, self);
+                setChildLast(toParent || document.querySelector(".modify-theme-wrapper"), self);
                 $.visible = true;
             }
             doEnter = function doEnter(toParent) {
@@ -655,14 +655,15 @@
                 theColor = P2RGB(theData);
                 var t = e.target,
                     isSource = source === getClosest(t, source),
-                    isSelf = self === getClosest(t, self);
+                    isSelf = self === getClosest(t, self),
+                    isSpecified = document.querySelector('.modify-theme-wrapper') === getClosest(t, document.querySelector('.modify-theme-wrapper'));
                 $.current = null;
                 if (!isSource && !isSelf) {
                     if (hooks.blur) {
                         fire('blur', theColor);
                     } else {
                         // Click outside the source or picker element to exit
-                        if (SVDragging || HDragging || ADragging);
+                        if (SVDragging || HDragging || ADragging || isSpecified);
                         else {
                             getParent(self) && doExit();
                         }

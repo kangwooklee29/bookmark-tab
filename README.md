@@ -11,7 +11,7 @@ You can view your bookmarks on the new tab page of your browser, and easily rear
 - Geolocation Data: We collect information related to your geolocation to offer weather forecast information. Your location is approximated to within about 10 km to protect your privacy. While this calculation is done on your device, the information is transmitted to [OpenWeatherMap](https://openweathermap.org/) API to provide the service.
 
 ## Screenshots
-<img width="640" src="https://github.com/kangwooklee29/bookmark-tab/assets/141019638/0ca88144-3b4c-425e-96a2-650d9c0bf189">
+<img width="640" src="https://github.com/kangwooklee29/bookmark-tab/assets/141019638/37f81d40-e0c1-47ab-baa4-06fae73c4b72">
 
 ## Links
 - Bookmark Tab - [GitHub Repository](https://github.com/kangwooklee29/bookmark-tab), [Privacy Policy](docs/privacy.html)

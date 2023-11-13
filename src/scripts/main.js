@@ -94,7 +94,7 @@ document.querySelector("#colorPicker").addEventListener("input", e => {
 document.querySelector("div.bookmark-search input").addEventListener("input", e => { 
     if (debounceTimer)
         clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => { main.move_folder(initial_folder_id); }, 300);
+    debounceTimer = setTimeout(() => { main.move_folder(main.folder_id); }, 300);
 });
 
 document.body.addEventListener("click", (e)=>

@@ -24,17 +24,21 @@ table {
 
 td {
     padding: 0px;
-    width: 37px;
+    width: 40px;
+    overflow-x: hidden;
     font-size: 11pt;
 }
 
 tr {
     height: 37px;
+    display: flex;
+    align-items: center;
 }
 
 tr.time > td {
     height: 25px;
     font-weight: 400;
+    width: 400px;
 }
 
 tr.time > td > div {

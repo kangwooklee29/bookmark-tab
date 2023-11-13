@@ -124,7 +124,7 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
     // cur_date가 19시인데 stored_date가 18, 21, 0, 3, 6시면 업데이트 해야.
     // cur_date가 20시인데 stored_date가 19, 21, 0, 3, 6, 9시면 업데이트 x.
     // cur_date가 21시인데 storde_date가 20, 21, 0, 3, 6, 9시면 업데이트 x.
-    if (cur_date.getHours() % 3 == 0 || !prev_weather_info) {
+    if (cur_date.getHours() % 3 == 0 || !prev_weather_info || cur_date - stored_date >= 3600000) {
       url = `https://api.openweathermap.org/data/2.5/forecast?${params.toString()}`;
       res_json = null;
       for (let i = 0; i < 5; i++) {

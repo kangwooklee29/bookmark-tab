@@ -57,6 +57,6 @@ tr.time > td > div > div.sepa {
     font-size: 1pt;
 }
 
-img {
+img, svg {
     width: 25px;
 }

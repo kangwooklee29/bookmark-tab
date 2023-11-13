@@ -178,7 +178,7 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
 
       for (let i = 0; i < cnt; i++) {
         weather_info.push({
-          icon: `<img src="${get_icon_str((time[i] > sunrise && time[i] < sunset), pty[i])}">`,
+          icon: get_icon_str((time[i] > sunrise && time[i] < sunset), pty[i]),
           time: time[i],
           tmp: tmp[i],
           pcp: pcp[i],

@@ -31,10 +31,14 @@ async function displayWeather(weatherInfo) {
     // Create and append other rows (icon, pop, pcp, tmp)
     ['icon', 'pop', 'pcp', 'tmp'].forEach(key => {
       const row = document.createElement('tr');
-      weatherInfo.forEach((info, index) => {
+      weatherInfo.forEach(async (info, index) => {
         if (index === 10) return;
         const cell = document.createElement('td');
         cell.innerHTML = info[key];
+        if (key === 'icon') {
+          const response = await fetch(info[key]);
+          cell.innerHTML =  await response.text();
+        }
         if (key === 'pcp') {
           if (info[key] === 0) {
             cell.innerHTML = "-";

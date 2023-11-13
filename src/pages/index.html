@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>새 탭</title>
+  <title data-i18n="newtab_title"">새 탭</title>
   <meta charset="utf-8">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/color-picker.min.css">
@@ -10,8 +10,8 @@
 <body>
   <div class="weather_info"><iframe scrolling="no"></iframe></div>
   <div class="header-container">
-    <a href="https://kangwooklee29.github.io/bookmark-tab"><img src="../assets/img/logo.png"></a>
-    <div class="bookmark-search"><input type=text></div>
+    <a href="https://kangwooklee29.github.io/bookmark-tab"><img src="../assets/img/logo.svg"></a>
+    <div class="bookmark-search"><input type=text data-i18n="search_bookmarks"></div>
     <span class="current-time"></span>
   </div>
   <div class="folder_list"></div>
@@ -19,21 +19,21 @@
   </main>
   <div id="overlay" class="hide"></div>
   <div class="mod_box hide">
-    <h2 class="new"><span class="new_folder">New Folder</span></h2>
-    <h2 class="mod">Modify</h2>
-    <div class="label" id="name">Name</div>
+    <h2 class="new"><span class="new_folder" data-i18n="new_folder">New Folder</span></h2>
+    <h2 class="mod" data-i18n="modify"">Modify</h2>
+    <div class="label" id="name" data-i18n="name"">Name</div>
     <div class="input"><input type="text" class="name"></div>
     <div class="url">
-      <div class="label">URL</div>
+      <div class="label" data-i18n="url">URL</div>
       <div class="input"><input type="text" class="url"></div>
     </div>
-    <div class="label" id="memo">Memo</div>
+    <div class="label" id="memo" data-i18n="memo">Memo</div>
     <div class="input"><input type="text" class="memo"></div>
     <div class="buttons">
       <div>
-      <button class="delete">Delete</button>
-      <button class="cancel">Cancel</button>
-      <button class="confirm">Confirm</button>
+      <button class="delete" data-i18n="delete"">Delete</button>
+      <button class="cancel" data-i18n="cancel">Cancel</button>
+      <button class="confirm" data-i18n="confirm">Confirm</button>
     </div>
     </div>
   </div>
@@ -41,8 +41,8 @@
   <div class="modify-theme-wrapper">
     <button class="modify-theme-button"><img src="../assets/img/icon_pencil.svg"></button>
     <div class="modify-theme-box">
-      <div><label for="fileViewer">Background img</label><div id="fileViewer">Click to upload</div><input type="file" id="fileInput" style="display:none;"></div>
-      <div><label for="colorPicker">Background color</label><input type="text" id="colorPicker"></div>
+      <div><label for="fileViewer" data-i18n="background_img"">Background img</label><div id="fileViewer" data-i18n="click_to_upload">Click to upload</div><input type="file" id="fileInput" style="display:none;"></div>
+      <div><label for="colorPicker" data-i18n="background_color">Background color</label><input type="text" id="colorPicker"></div>
       <div class="color-example">
         <div style="background-color: #fff; border: 1px solid rgb(217, 218, 223); "></div>
         <div style="background-color: rgb(217, 218, 223);"></div>
@@ -67,11 +67,6 @@
 
 개발 단계
 
-2. index.html에 data-18i 속성 쓰고 main.js에 관련 구현 하기
-3. 여러 색깔로 테스트해서 전체적인 엘리먼트들 적절한 색깔 결정하기. 각 배경색에 따른 적절한 폰트 컬러만 선택하면 디자인적으로는 완성될 듯. 
-6. search-bookmark placeholder 넣기
 7. search-bookmark 값 변경될 때마다 bookmark에서 검색해서 목록 뽑기. 폴더는 다 보여줘야 하고, 이때 아이콘 드래그앤드롭은 안되는데 폴더에 넣는건 됨. 검색어 입력 시 날씨 화면 사라짐. 
-8. search-bookmark 배경색 적절히 변경되야됨
-10. 날씨 엘리먼트
 
 -->

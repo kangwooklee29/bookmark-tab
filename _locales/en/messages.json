@@ -14,5 +14,8 @@
     "restore": { "message": "RESTORE" },
     "restore_backup": { "message": "Restore Back-up"},
     "click_to_ask": { "message": "Click to ask"},
-    "search_bookmarks": { "message": "Search bookmarks"}
+    "search_bookmarks": { "message": "Search bookmarks"},
+    "background_img": { "message": "Background img"},
+    "background_color": { "message": "Background color"},
+    "click_to_upload": { "message": "Click to upload"}
 }

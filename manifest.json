@@ -3,7 +3,7 @@
     "name": "Bookmark Tab",
     "description": "Displays your bookmarks in a neat layout on the new tab page.",
     "icons": {
-      "256": "src/assets/img/logo.png"
+      "256": "src/assets/img/logo.svg"
     },
     "version": "2.1.1",
     "chrome_url_overrides" : {

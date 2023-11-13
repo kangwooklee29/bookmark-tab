@@ -15,10 +15,10 @@ function calcIconWrapperColor(color) {
     if (!color) return "rgba(0, 0, 0, 0.1)";
     let ov = color.match(/[\d.]+/g).map(Number);
     const mod = ov.map(value => {
-        let normalizedValue = value / Math.max(...ov);
-        let angle = Math.asin(normalizedValue); 
-        let newAngle = angle - 0.24;
-        return Math.pow(Math.sin(newAngle), 1) * Math.max(...ov) ;
+        let normalizedValue = value / 257;
+        let angle = 0.5 - (1 / 5) * Math.log(1 / normalizedValue - 1); 
+        let newAngle = angle * 0.8;
+        return (1 / (1 + Math.exp(-5 * (newAngle - 0.5)))) * 255;
     });
     return `rgb(${mod[0]}, ${mod[1]}, ${mod[2]})`;
 }
@@ -30,15 +30,31 @@ function updateBackgroundColor(color) {
     document.querySelector(".mod_box").style.backgroundColor = color;
     document.querySelector(".modify-theme-wrapper").style.backgroundColor = color;
 
-
-    document.querySelectorAll("div.cell a").forEach(elem=> {elem.style.backgroundColor = calcIconWrapperColor(color)});
+    let rgbValues = color ? color.match(/[\d.]+/g).map(Number) : [255, 255, 255];
+    let fontColor = 0.299 * rgbValues[0] + 0.587 * rgbValues[1] + 0.114 * rgbValues[2] < 128 ? "white" : "rgb(32, 33, 36)";
+    document.querySelectorAll("div").forEach(elem=> {elem.style.color = fontColor;});
+    document.querySelectorAll("div.mod_box input").forEach(elem=> {elem.style.color = fontColor;});
+    document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.color = fontColor;});
+    
+    let wrapperColor = calcIconWrapperColor(color);
+    document.querySelectorAll("div.cell a").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
+    document.querySelectorAll("div.mod_box input").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
+    document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
+    if(document.querySelector(".header-container a svg")) {
+        document.querySelector(".header-container a svg").style.fill = wrapperColor;
+    }
 
     if (debounceTimer)
         clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         API.storage.sync.set({backgroundColor: color});
         API.storage.local.set({ 'backgroundImage': "" });
-    }, 300);
+        document.querySelectorAll("p").forEach(elem=> {elem.style.color = fontColor;});
+        let weatherFrame = document.querySelector("iframe");
+        var weatherBody = weatherFrame.contentDocument || weatherFrame.contentWindow.document;
+        weatherBody.querySelectorAll("td").forEach(elem=> {elem.style.color = fontColor;});
+        weatherBody.querySelectorAll("svg").forEach(elem=> {elem.style.fill = fontColor;});
+    }, 100);
 }
 
 const observer = new MutationObserver(mutations => {
@@ -73,6 +89,12 @@ document.querySelector("#colorPicker").addEventListener("input", e => {
     document.querySelector("#colorPicker").value = e.target.value;
     var [r, g, b] = e.target.value.match(/\d+/g).map(Number);
     picker.set(r, g, b, 1);
+});
+
+document.querySelector("div.bookmark-search input").addEventListener("input", e => { 
+    if (debounceTimer)
+        clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => { main.move_folder(initial_folder_id); }, 300);
 });
 
 document.body.addEventListener("click", (e)=>
@@ -149,12 +171,12 @@ document.body.addEventListener("click", (e)=>
 });
 
 document.body.addEventListener("mouseover", e => {
-    if (e.target.parentNode.classList.contains("cell") && !e.target.contains(e.relatedTarget)) {
+    if (e.target.parentNode.classList.contains("cell")) {
         const arrow_box = e.target.querySelector("p.arrow_box");
         if (arrow_box) {
             arrow_box.style.display = 'block';
             let calcHeight = 70 + arrow_box.getBoundingClientRect().height;
-            if (calcHeight < 112) calcHeight = 112;
+            if (calcHeight < 120) calcHeight = 120;
             e.target.style.height = `${calcHeight}px`;
             e.target.querySelector("p.icon_title").style.display = 'none';
         }
@@ -165,7 +187,7 @@ document.body.addEventListener("mouseover", e => {
 });
 
 document.body.addEventListener("mouseout", e => {
-    // 현재 마우스 커서가 떠난 엘리먼트가 cur_hover_elem의 자식인 경우
+    // 이제 막 마우스 커서가 떠난 엘리먼트가 cur_hover_elem 또는 그 자식인 경우 & 마우스 커서가 **도착**한 엘리먼트가 cur_hover_elem의 자식이 아닌 경우
     if (cur_hover_elem && cur_hover_elem.contains(e.target) && !cur_hover_elem.contains(e.relatedTarget)) {
         cur_hover_elem.style.height = `120px`;
         if (cur_hover_elem.querySelector("p.arrow_box")) {
@@ -268,26 +290,26 @@ class Main{
         this.folder_list_obj.innerHTML = (folder_stack.length === 1)  ? "" : [...folder_stack].reverse().map((e)=>{return `<span id="${e.id}">${e.title}</span>`}).join("&nbsp;>&nbsp;") + "&nbsp;>";
     }
 
-    move_folder(id)
-    {
+    move_folder(id) {
         this.folder_id = id;
         this.print_folder_list();
         this.clear_main();
-        API.bookmarks.getChildren(id, async (b)=>
-        {
-            for (var e of b)
-            {
-                var cell = new Cell();
-                var icon  = ('url' in e && e.url) ? new Icon(e) : new FolderIcon(e);
-                cell.put_innerHTML(await icon.get_innerHTML());
-                this.put(cell, icon.id);
+        const keyword = document.querySelector("div.bookmark-search input").value;
+        API.bookmarks.getChildren(id, async (b) => {
+            for (var e of b) {
+                if (!keyword || e.title.includes(keyword) || (e.url && e.url.includes(keyword)) || !('url' in e) || !e.url) {
+                    var cell = new Cell();
+                    var icon  = ('url' in e && e.url) ? new Icon(e) : new FolderIcon(e);
+                    cell.put_innerHTML(await icon.get_innerHTML());
+                    this.put(cell, icon.id);
+                }
             }
         
             this.put(this.plus_obj, "plus");
         
             for (var i = 0; i < 4; i++)
                 this.put(new Cell(), "blank");
-        });        
+        });
     }
 
 }
@@ -625,7 +647,10 @@ function updateCurTime() {
 updateCurTime();
 setInterval(updateCurTime, 1000 * 60);
 
-API.storage.sync.get(['backgroundColor'], items => {
+API.storage.sync.get(['backgroundColor'], async items => {
+    const response = await fetch("../assets/img/logo.svg");
+    document.querySelector(".header-container a").innerHTML =  await response.text();
+    document.querySelector(".header-container a svg").classList.add("logo");
     document.querySelector("#colorPicker").value = items.backgroundColor;
     updateBackgroundColor(items.backgroundColor);
     if (items.backgroundColor) {
@@ -652,12 +677,9 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     document.getElementById('fileViewer').innerText = document.getElementById('fileInput').files[0].name;
 });
 
-document.querySelector('title').textContent = chrome.i18n.getMessage("newtab_title");
-document.querySelector('.new_folder').textContent = chrome.i18n.getMessage("new_folder");
-document.querySelector('.mod').textContent = chrome.i18n.getMessage("modify");
-document.querySelector('#name').textContent = chrome.i18n.getMessage("name");
-document.querySelector('.url > .label').textContent = chrome.i18n.getMessage("url");
-document.querySelector('#memo').textContent = chrome.i18n.getMessage("memo");
-document.querySelector('.delete').textContent = chrome.i18n.getMessage("delete");
-document.querySelector('.cancel').textContent = chrome.i18n.getMessage("cancel");
-document.querySelector('.confirm').textContent = chrome.i18n.getMessage("confirm");
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = API.i18n.getMessage(el.getAttribute('data-i18n'));
+    });
+    document.querySelector("div.bookmark-search input").placeholder =  API.i18n.getMessage("search_bookmarks");
+});

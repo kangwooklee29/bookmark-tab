@@ -28,3 +28,19 @@ main > div > label {
 main > div > div {
     width: 70%;
 }
+
+button {
+    border: 1px solid black;
+}
+
+#restore_backup div {
+    flex-direction: column;
+}
+
+#restore_backup > div > * {
+    width: 80%;
+}
+
+#restore_backup > div > div {
+    align-items: flex-end;
+}

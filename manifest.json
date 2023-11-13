@@ -6,7 +6,7 @@
       "48": "src/assets/img/logo-store.png",
       "256": "src/assets/img/logo.svg"
     },
-    "version": "3.0",
+    "version": "3.1",
     "chrome_url_overrides" : {
         "newtab": "src/pages/index.html"
       },

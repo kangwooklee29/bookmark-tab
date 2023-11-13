@@ -668,13 +668,16 @@ var main = new Main(document.querySelector("main"));
 var mod_box = new ModBox(document.querySelector("div.mod_box"));
 
 function updateCurTime() {
-    document.querySelector('span.current-time').textContent = new Date().toLocaleString('en-US', {
+    let cur_date = new Date();
+    document.querySelector('span.current-time').textContent = cur_date.toLocaleString('en-US', {
         month: 'numeric',
         day: 'numeric',
         weekday: 'short',
         hour: '2-digit',
         minute: '2-digit'
     });
+    if (cur_date.getMinutes() === 0)
+        document.querySelector("iframe").src = document.querySelector("iframe").src;
 }
 
 updateCurTime();

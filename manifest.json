@@ -3,6 +3,7 @@
     "name": "Bookmark Tab",
     "description": "Displays your bookmarks in a neat layout on the new tab page.",
     "icons": {
+      "48": "src/assets/img/logo-store.png",
       "256": "src/assets/img/logo.svg"
     },
     "version": "3.0",

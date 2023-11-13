@@ -43,6 +43,9 @@ function updateBackgroundColor(color) {
     document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
     if(document.querySelector(".header-container a svg")) {
         document.querySelector(".header-container a svg").style.fill = wrapperColor;
+        if (rgbValues[0] >= 250 && rgbValues[1] >= 250 && rgbValues[2] >= 250) {
+            document.querySelector(".header-container a svg").style.fill = "rgb(230, 230, 230)";
+        }
     }
     document.querySelector(".modify-theme-box #fileViewer").style.backgroundColor = wrapperColor;
 

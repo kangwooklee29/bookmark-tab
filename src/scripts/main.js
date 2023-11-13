@@ -33,6 +33,7 @@ function updateBackgroundColor(color) {
     let rgbValues = color ? color.match(/[\d.]+/g).map(Number) : [255, 255, 255];
     let fontColor = 0.299 * rgbValues[0] + 0.587 * rgbValues[1] + 0.114 * rgbValues[2] < 128 ? "white" : "rgb(32, 33, 36)";
     document.querySelectorAll("div").forEach(elem=> {elem.style.color = fontColor;});
+    document.querySelectorAll("span").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("div.mod_box input").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.color = fontColor;});
     
@@ -43,6 +44,7 @@ function updateBackgroundColor(color) {
     if(document.querySelector(".header-container a svg")) {
         document.querySelector(".header-container a svg").style.fill = wrapperColor;
     }
+    document.querySelector(".modify-theme-box #fileViewer").style.backgroundColor = wrapperColor;
 
     if (debounceTimer)
         clearTimeout(debounceTimer);
@@ -54,6 +56,7 @@ function updateBackgroundColor(color) {
         var weatherBody = weatherFrame.contentDocument || weatherFrame.contentWindow.document;
         weatherBody.querySelectorAll("td").forEach(elem=> {elem.style.color = fontColor;});
         weatherBody.querySelectorAll("svg").forEach(elem=> {elem.style.fill = fontColor;});
+        document.querySelectorAll("div.cell > div > font").forEach(elem=> {elem.style.color = fontColor;});
     }, 100);
 }
 
@@ -86,9 +89,24 @@ function blendColors(background, overlay) {
 }
 
 document.querySelector("#colorPicker").addEventListener("input", e => { 
-    document.querySelector("#colorPicker").value = e.target.value;
-    var [r, g, b] = e.target.value.match(/\d+/g).map(Number);
-    picker.set(r, g, b, 1);
+    const splitArr = e.target.value.match(/\d+/g);
+    if (splitArr && splitArr.length >= 3) {
+        var [r, g, b] = splitArr.map(Number);
+        picker.set(r, g, b, 1);
+    } else {
+        let x = e.target.value.trim();
+        var count = x.length;
+        if ((4 === count || 7 === count) && '#' === x[0]) {
+            if (/^#([a-f\d]{3}){1,2}$/i.test(x)) {
+                if (4 === count) {
+                    var [r, g, b] = [1, 2, 3].map(elem => parseInt(x[elem] + x[elem], 16));
+                    picker.set(r, g, b, 1);
+                } else
+                    var [r, g, b] = [1, 2, 3].map(elem => parseInt(x[elem] + x[elem + 1], 16));
+                    picker.set(r, g, b, 1);
+                }
+        }
+    }
 });
 
 document.querySelector("div.bookmark-search input").addEventListener("input", e => { 
@@ -656,7 +674,8 @@ API.storage.sync.get(['backgroundColor'], async items => {
     if (items.backgroundColor) {
         var [r, g, b] = items.backgroundColor.match(/\d+/g).map(Number);
         picker.set(r, g, b, 1);
-    }
+    } else 
+        picker.set(255, 255, 255, 1);
 });
 
 API.storage.local.get('backgroundImage', function(result) {

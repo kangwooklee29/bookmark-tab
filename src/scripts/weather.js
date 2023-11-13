@@ -29,10 +29,11 @@ async function displayWeather(weatherInfo) {
     table.appendChild(timeRow);
 
     // Create and append other rows (icon, pop, pcp, tmp)
-    ['icon', 'pop', 'pcp', 'tmp'].forEach(key => {
+    for (key of ['icon', 'pop', 'pcp', 'tmp']) {
       const row = document.createElement('tr');
-      weatherInfo.forEach(async (info, index) => {
-        if (index === 10) return;
+      for (let index = 0; index < weatherInfo.length; index++) {
+        if (index === 10) break;
+        let info  = weatherInfo[index];
         const cell = document.createElement('td');
         cell.innerHTML = info[key];
         if (key === 'icon') {
@@ -51,9 +52,9 @@ async function displayWeather(weatherInfo) {
         if (key === "tmp") cell.innerHTML += "℃";
         if (key === "pop") cell.innerHTML += "%";
         row.appendChild(cell);
-      });
+      }
       table.appendChild(row);
-    });
+    }
 
 }
 

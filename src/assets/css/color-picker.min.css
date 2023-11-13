@@ -103,7 +103,7 @@
     right: 60px;
     position: fixed;
     bottom: 35px;
-    z-index: 9999;
+    z-index: 999999;
   }
   
   .color-picker__cursor {

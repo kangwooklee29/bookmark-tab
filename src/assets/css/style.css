@@ -369,6 +369,7 @@ input[type="text"]:focus {
     right: 20px;
     width: 32px;
     height: 32px;
+    z-index: 100000;
 }
 
 .modify-theme-wrapper button {
@@ -436,4 +437,8 @@ div.color-example div {
     border-radius: 50%;
     height: 27px;
     width: 27px;
+}
+
+.color-clicked {
+    border: 1px solid black;
 }

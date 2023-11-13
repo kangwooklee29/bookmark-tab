@@ -502,7 +502,7 @@ document.body.addEventListener("dragenter", (e) => {
 });
 
 document.body.addEventListener("dragleave", (e) => {
-    if (e.target.classList.contains("folder_selected") && didnleave !== e.target) dragleave = e.target;
+    if (e.target.classList.contains("folder_selected") && didnleave !== e.target && e.target.nodeName !== "SPAN") dragleave = e.target;
 });
 
 document.body.addEventListener("dragend", async (e) => {

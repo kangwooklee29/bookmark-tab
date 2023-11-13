@@ -20,7 +20,7 @@ This Privacy Policy outlines how the Bookmark Tab extension collects, uses, and 
 - Geolocation Services: To offer accurate weather forecast information, your current location is initially processed on your device for enhanced privacy. However, to provide detailed forecasts, this data is transmitted to OpenWeatherMap API.
 
 ## Sharing of Information
-- We do not share your collected information with any third parties.
+- We collect geolocation data, process it locally to reduce accuracy to 10km, and share this data with OpenWeatherMap for weather services.
 
 ## User Rights and Choices
 - You can manage and delete your information at any time through the extension's settings.

@@ -49,6 +49,11 @@ function updateBackgroundColor(color) {
     }
     document.querySelector(".modify-theme-box #fileViewer").style.backgroundColor = wrapperColor;
 
+    document.querySelector("div.color-example").childNodes.forEach(elem => {
+        if (elem.style && elem.style.backgroundColor === color) elem.classList.add("color-clicked");
+        else if (elem.nodeName === "DIV") elem.classList.remove("color-clicked");
+    });
+
     if (debounceTimer)
         clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
@@ -120,13 +125,6 @@ document.querySelector("div.bookmark-search input").addEventListener("input", e 
 
 document.body.addEventListener("click", (e)=>
 {
-    if (document.querySelector("div.color-example").contains(e.target)) {
-        document.querySelector("div.color-example").childNodes.forEach(elem => {
-            if (elem === e.target) elem.classList.add("color-clicked");
-            else if (elem.nodeName === "DIV") elem.classList.remove("color-clicked");
-        });
-    }
-
     if (e.target === document.querySelector("#fileViewer"))
         document.getElementById('fileInput').click();
 

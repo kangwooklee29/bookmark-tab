@@ -50,7 +50,12 @@ async function displayWeather(weatherInfo) {
             cell.innerHTML += "㎜";
         }
         if (key === "tmp") cell.innerHTML += "℃";
-        if (key === "pop") cell.innerHTML += "%";
+        if (key === "pop") {
+          if (index === 0)
+            cell.innerHTML = "";
+          else
+            cell.innerHTML += "%";
+        }
         row.appendChild(cell);
       }
       table.appendChild(row);

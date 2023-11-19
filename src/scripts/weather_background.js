@@ -7,16 +7,12 @@ API.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.greeting === "fetchWeather") {
       API.storage.sync.get(null, async (items) => {
-
-        var now = new Date();
-        const weather_info = await update_weather( now, new Date(items.weather_info_datetime), request.weather_loc, items.weather_info);
-        console.log(items.weather_info, weather_info);
-        if (!items.weather_info || !weather_info.every((val, idx) => val.time === items.weather_info[idx].time))
-          API.storage.sync.set({ weather_info: weather_info, weather_info_datetime:  new Date().getTime(), weather_loc: request.weather_loc }, () => {
-            console.log("done");
-            sendResponse({farewell: true});
-          });
-        else sendResponse({farewell: true});
+        let now = new Date();
+        const weather_info = await update_weather(now, new Date(items.weather_info_datetime), request.weather_loc, items.weather_info);
+        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: now.getTime(), weather_loc: request.weather_loc }, () => {
+          console.log("done");
+          sendResponse({farewell: true});
+        });
       });
     }
     return true;
@@ -34,11 +30,11 @@ function setAlarmForNextHour() {
 
 chrome.alarms.onAlarm.addListener(() => {
   API.storage.sync.get(null, async (items) => {
-    const weather_info = await update_weather( new Date(), new Date(items.weather_info_datetime), items.weather_loc, items.weather_info);
-    if (!items.weather_info || !weather_info.every((val, idx) => val.time === items.weather_info[idx].time))
-      API.storage.sync.set({ weather_info: weather_info, weather_info_datetime:  new Date().getTime() }, () => {
-        console.log("done");
-      });
+    let now = new Date();
+    const weather_info = await update_weather(now, new Date(items.weather_info_datetime), items.weather_loc, items.weather_info);
+    API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: now.getTime() }, () => {
+      console.log("done");
+    });
   });
 });
 
@@ -84,7 +80,6 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
   const weather_info = [], records = [];
 
   if (cur_date.getHours() === stored_date.getHours()) return prev_weather_info;
-  console.log("current update datetime:", (new Date(cur_date - cur_date.getTimezoneOffset() * 60000)).toISOString());
 
   if (!config) {
     const response = await fetch('../../weather_api_key.json');
@@ -92,13 +87,43 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
   }
 
   const params = new URLSearchParams({
-      appid: config.weather_api,
-      lat: weather_loc.latitude,
-      lon: weather_loc.longitude
-    });
+    appid: config.weather_api,
+    lat: weather_loc.latitude,
+    lon: weather_loc.longitude
+  });
 
-    let url = `https://api.openweathermap.org/data/2.5/weather?${params.toString()}`;
-    let res_json = null;
+  let url = `https://api.openweathermap.org/data/2.5/weather?${params.toString()}`;
+  let res_json = null;
+  for (let i = 0; i < 5; i++) {
+    try {
+      const response = await fetch(url);
+      res_json = await response.json();
+      break;
+    } catch (error) {
+      if (i < 4) { // 마지막 시도에서는 대기하지 않음
+        console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+  }
+  if (!res_json) { console.error('Failed to fetch weather info'); return; }
+
+  let sunrise, sunset;
+  if (res_json.cod === 200) {
+    sunrise = new Date(res_json.sys.sunrise * 1000).getHours();
+    sunset = new Date(res_json.sys.sunset * 1000).getHours();
+    res_json.dt = cur_date.getTime() / 1000;
+    records.push(res_json);
+  }
+
+  // 5개를 display하는 상황이라고 가정할 때.
+  // cur_date가 18시이면 21, 0, 3, 6, 9, 12, ...를 가져온다. 현재 17, 18, 21, 0, 3, 6 이렇게 6개 있는데 다 날아가고.
+  //                                                  업데이트 후, 18, 21, 0, 3, 6, 9가 저장된다.
+  // cur_date가 19시이면 안 가져온다. 19, 21, 0, 3, 6, 9가 저장된다.
+  // cur_date가 20시이면 안 가져온다. 20, 21, 0, 3, 6, 9가 저장된다.
+  if (cur_date.getHours() % 3 == 0 || !prev_weather_info || cur_date - stored_date >= 3600000) {
+    url = `https://api.openweathermap.org/data/2.5/forecast?${params.toString()}`;
+    res_json = null;
     for (let i = 0; i < 5; i++) {
       try {
         const response = await fetch(url);
@@ -112,85 +137,54 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
       }
     }
     if (!res_json) { console.error('Failed to fetch weather info'); return; }
-
-    let sunrise, sunset;
-    if (res_json.cod === 200) {
-      sunrise = new Date(res_json.sys.sunrise * 1000).getHours();
-      sunset = new Date(res_json.sys.sunset * 1000).getHours();
-      res_json.dt = cur_date.getTime() / 1000;
-      records.push(res_json);
-    }
-
-    // cur_date가 19시인데 stored_date가 18, 21, 0, 3, 6시면 업데이트 해야.
-    // cur_date가 20시인데 stored_date가 19, 21, 0, 3, 6, 9시면 업데이트 x.
-    // cur_date가 21시인데 storde_date가 20, 21, 0, 3, 6, 9시면 업데이트 x.
-    if (cur_date.getHours() % 3 == 0 || !prev_weather_info || cur_date - stored_date >= 3600000) {
-      url = `https://api.openweathermap.org/data/2.5/forecast?${params.toString()}`;
-      res_json = null;
-      for (let i = 0; i < 5; i++) {
-        try {
-          const response = await fetch(url);
-          res_json = await response.json();
-          break;
-        } catch (error) {
-          if (i < 4) { // 마지막 시도에서는 대기하지 않음
-            console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
-      }
-      if (!res_json) { console.error('Failed to fetch weather info'); return; }
+    if (new Date(res_json.list[0].dt * 1000).getHours() === cur_date.getHours())
+      records.push(...res_json.list.slice(1));
+    else
       records.push(...res_json.list);
-    } 
+  }
 
-      const pty = [], tmp = [], pcp = [], pop = [], time = [];
+  const pty = [], tmp = [], pcp = [], pop = [], time = [];
+  let cnt = 0;
+  for (const item of records) {
+    time.push(new Date(item.dt * 1000).getHours());
 
-      let cnt = 0;
-      for (const item of records) {
-        time.push(new Date(item.dt * 1000).getHours());
+    if (item.pop !== undefined)
+      pop.push(Math.floor(item.pop * 100));
+    else
+      pop.push(0);
 
-        if (item.pop !== undefined)
-          pop.push(Math.floor(item.pop * 100));
-        else
-          pop.push(0);
+    const celsius = item.main.temp - 273.15;
+    tmp.push(celsius >= 0 ? Math.round(celsius) : Math.round(celsius * 10) / 10);
 
-        const celsius = item.main.temp - 273.15;
-        tmp.push(celsius >= 0 ? Math.round(celsius) : Math.round(celsius * 10) / 10);
+    let cur_pcp = 0;
+    if (item.rain && ("1h" in item.rain || "3h" in item.rain)) {
+      cur_pcp = Math.floor("1h" in item.rain ? item.rain["1h"] : item.rain["3h"] / 3);
+      if ("3h" in item.rain && cur_pcp === 0)
+        cur_pcp = 1;
+    } else if (item.snow && ("1h" in item.snow || "3h" in item.snow)) {
+      cur_pcp = Math.floor("1h" in item.snow ? item.snow["1h"] : item.snow["3h"] / 3);
+      if ("3h" in item.snow && cur_pcp === 0)
+        cur_pcp = 1;
+    }
+    pcp.push(cur_pcp);
+    pty.push(item.weather[0].id); // 현재 눈/비 오는지. 비오면 5xx, 눈오면 60x or 62x, 눈비는 61x. 
 
-        let cur_pcp = 0;
-        if (item.rain && ("1h" in item.rain || "3h" in item.rain)) {
-          cur_pcp = Math.floor("1h" in item.rain ? item.rain["1h"] : item.rain["3h"] / 3);
-          if ("3h" in item.rain && cur_pcp === 0)
-            cur_pcp = 1;
-        }
-        else if (item.snow && ("1h" in item.snow || "3h" in item.snow)) {
-          cur_pcp = Math.floor("1h" in item.snow ? item.snow["1h"] : item.snow["3h"] / 3);
-          if ("3h" in item.snow && cur_pcp === 0)
-            cur_pcp = 1;
-        }
-        pcp.push(cur_pcp);
+    cnt++;
+    if (cnt > n) break;
+  }
 
-        pty.push(item.weather[0].id); // 현재 눈/비 오는지. 비오면 5xx, 눈오면 60x or 62x, 눈비는 61x. 
+  for (let i = 0; i < cnt; i++)
+    weather_info.push({
+      icon: get_icon_str((time[i] > sunrise && time[i] < sunset), pty[i]),
+      time: time[i],
+      tmp: tmp[i],
+      pcp: pcp[i],
+      pop: pop[i]
+    });
 
-        cnt++;
-        if (cnt > n) break;
-      }
+  // cur_date.getHours()가 3의 배수가 아니면 최신 날씨만 가져옴.
+  if (cnt === 1)
+    weather_info.push(...prev_weather_info.slice(1));
 
-      for (let i = 0; i < cnt; i++) {
-        weather_info.push({
-          icon: get_icon_str((time[i] > sunrise && time[i] < sunset), pty[i]),
-          time: time[i],
-          tmp: tmp[i],
-          pcp: pcp[i],
-          pop: pop[i]
-        });
-      }
-      if (cnt === 1) {
-        if (cur_date.getHours() % 3 == 0)
-          weather_info.push(...prev_weather_info.slice(2));
-        else
-          weather_info.push(...prev_weather_info.slice(1));
-      }
-
-    return weather_info;
+  return weather_info;
 }

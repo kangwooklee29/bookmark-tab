@@ -1,17 +1,23 @@
-let API =  (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
+let API = (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 let n = 10;
 let config;
+let calendarAccessToken = null;
+const calendarClientId = '427328739540-3jorcqa54ie31ilrliejf9ko15ctjdj1.apps.googleusercontent.com';
 
 // 옵션에서 새로운 주소지를 설정한 경우, 새 탭 페이지를 열었는데 현재 시간이 저장된 시간과 다른 경우 메시지 전송이 이뤄진다.
 API.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
+    const now = new Date();
     if (request.greeting === "fetchWeather") {
-      API.storage.sync.get(null, async (items) => {
-        let now = new Date();
-        const weather_info = await update_weather(now, new Date(items.weather_info_datetime), request.weather_loc, items.weather_info);
+      update_weather(now, new Date(request.weather_info_datetime), request.weather_loc, request.weather_info).then(weather_info => {
         API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: now.getTime(), weather_loc: request.weather_loc }, () => {
-          console.log("done");
-          sendResponse({farewell: true});
+          sendResponse({farewell: true, weather_info: weather_info});
+        });  
+      });
+    } else if (request.greeting === "fetchCalendarEvents") {
+      fetchCalendarEvents(now, new Date(request.calendarUpdateTime), request.calendarEvents).then(calendarEvents => {
+        API.storage.sync.set({ calendarEvents: calendarEvents, calendarUpdateTime: now.getTime() }, () => {
+          sendResponse({farewell: true, calendarEvents: calendarEvents});
         });
       });
     }
@@ -189,53 +195,48 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
   return weather_info;
 }
 
-// Function to format a date in YYYY-MM-DD format
 function formatDate(date) {
-  return date.toISOString().split('T')[0];
+  let year = date.getFullYear();
+  let month = (date.getMonth() + 1).toString().padStart(2, '0');
+  let day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
-// Function to get dates for the upcoming week
-function getUpcomingWeek() {
-  const today = new Date();
-  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-  return { start: formatDate(today), end: formatDate(nextWeek) };
-}
+async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
+  if (cur_date.getHours() === stored_date.getHours() && cur_date - stored_date <= 3600000) return stored_events;
+  else console.log(cur_date.getHours(), stored_date.getHours(), cur_date - stored_date);
 
-// Async function to fetch calendar events using fetch API and async/await
-async function fetchCalendarEvents(accessToken) {
-  const { start, end } = getUpcomingWeek();
-
-  try {
-      const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${start}T00:00:00Z&timeMax=${end}T00:00:00Z`, {
-          headers: {
-              'Authorization': `Bearer ${accessToken}`
-          }
+  if (!calendarAccessToken) {
+    const items = await API.storage.sync.get(["calendarAccessToken"]);
+    if (!items.calendarAccessToken) {
+      const redirectUrl = await new Promise((resolve, reject) => {
+        chrome.identity.launchWebAuthFlow({
+          url: `https://accounts.google.com/o/oauth2/auth?client_id=${calendarClientId}&response_type=token&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar')}&redirect_uri=${encodeURIComponent(chrome.identity.getRedirectURL())}`,
+          interactive: true
+        }, (result) => {
+          if (chrome.runtime.lastError || !result)
+            reject(chrome.runtime.lastError);
+          else
+            resolve(result);
+        });
       });
-
-      if (!response.ok) {
-          throw new Error('Network response was not ok.');
-      }
-
-      const data = await response.json();
-      const events = data.items;
-      console.log('Upcoming events:', events);
-  } catch (error) {
-      console.error('Fetch error:', error);
+      const url = new URL(redirectUrl);
+      calendarAccessToken = url.hash.match(/access_token=([^&]+)/)[1];
+      API.storage.sync.set({calendarAccessToken: calendarAccessToken});  
+    } else
+      calendarAccessToken = items.calendarAccessToken;
   }
+
+  const nextWeek = new Date(cur_date.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${formatDate(cur_date)}T00:00:00Z&timeMax=${formatDate(nextWeek)}T00:00:00Z`, {
+    headers: { 'Authorization': `Bearer ${calendarAccessToken}` }
+  });
+
+  let events = [];
+  if (response.ok) {
+    const data = await response.json();
+    events = data.items;
+  }
+
+  return events;
 }
-
-const clientId = '427328739540-3jorcqa54ie31ilrliejf9ko15ctjdj1.apps.googleusercontent.com';
-
-// OAuth 2.0 인증 흐름 시작
-chrome.runtime.onInstalled.addListener(() => {
-  console.log(chrome.identity.getRedirectURL());
-    chrome.identity.launchWebAuthFlow({
-      url: `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&response_type=token&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar')}&redirect_uri=${encodeURIComponent(chrome.identity.getRedirectURL())}`,
-      interactive: true
-    }, (redirectUrl) => {
-        if (chrome.runtime.lastError || !redirectUrl) return;
-        const url = new URL(redirectUrl);
-        const accessToken = url.hash.match(/access_token=([^&]+)/)[1];
-        fetchCalendarEvents(accessToken);
-    });
-});

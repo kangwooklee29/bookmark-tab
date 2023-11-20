@@ -296,7 +296,7 @@ h2.new {
 
 .weather_info {
     width: 400px;
-    height: 200px;
+    height: 178px;
     margin: 0px;
     padding: 0px;
     position: relative;
@@ -441,4 +441,39 @@ div.color-example div {
 
 .color-clicked {
     border: 1px solid black;
+}
+
+div.calendar-events-wrapper {
+    display: none;
+    width: 400px;
+    height: 200px;
+    border: 1px solid black;
+    position: absolute;
+}
+
+div.calendar-day {
+    width: 57px;
+    height: 100px;
+    overflow-y: auto;
+    align-items: flex-start;
+    font-size: 8pt;
+}
+
+a {
+    text-decoration: none;
+}
+
+span.calendar-day-title {
+    width: 100%;
+}
+
+b.exclamation-mark {
+    font-weight: 1000;
+    color: white;
+    border-radius:50%;
+    background-color: #f33;
+    position: absolute;
+    display: none;
+    width: 13px;
+    font-size: 8pt;
 }

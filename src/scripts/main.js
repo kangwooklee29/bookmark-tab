@@ -1,5 +1,6 @@
 import CP from "./color-picker.js";
 
+let calendarWrapperElement, currentTimeElement;
 const picker = new CP(document.querySelector('#colorPicker'));
 picker.on('change', function (r, g, b, a) {
     if (r === 0 && g === 0 && b === 0) return;
@@ -10,6 +11,63 @@ picker.on('change', function (r, g, b, a) {
 let cur_hover_elem = null;
 
 let debounceTimer = null;
+
+function renderCalendarEvents(events) {
+    const eventObj = {};
+    for (const event of events) {
+        const start_date = event.start.dateTime.split("T");
+        const start_date_mm_dd = start_date[0].substring(5).replace("-", "/");
+        const new_elem = {start_time: start_date[1].substring(0, 5), end_time: event.end.dateTime.split("T")[1].substring(0, 5), summary: event.summary, htmlLink: event.htmlLink};
+        if (eventObj[start_date_mm_dd])
+            eventObj[start_date_mm_dd].push(new_elem);
+        else
+            eventObj[start_date_mm_dd] = [new_elem];
+    }
+    Object.keys(eventObj).forEach(key => eventObj[key].sort((a, b) => {
+        if (a.start_time < b.start_time) return -1;
+        return 1;
+    }));
+
+    let today = new Date();
+    let today_str = `${today.getMonth() + 1}/${today.getDate()}`;
+    let cur_date = new Date();
+    cur_date.setDate(cur_date.getDate() - cur_date.getDay());
+    let cur_month = cur_date.getMonth() + 1;
+    for (let i = 0; i < 14; i++) {
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("calendar-day");
+
+        let cur_day_str = cur_date.getDate();
+        if (cur_month < cur_date.getMonth() + 1) {
+            cur_month++;
+            cur_day_str = `${cur_month}/${cur_day_str}`;
+        }
+        itemElement.innerHTML = `<span class="calendar-day-title">${cur_day_str}</span>`;
+
+        const cur_day_key = `${cur_date.getMonth() + 1}/${cur_date.getDate()}`;
+        if (eventObj[cur_day_key])
+            eventObj[cur_day_key].forEach(event => {
+                const eventElement = document.createElement("a");
+                eventElement.innerHTML = `${event.start_time}-${event.end_time} / ${event.summary}`;
+                eventElement.href = event.htmlLink;
+                itemElement.appendChild(eventElement);
+
+                const start_datetime = new Date(today.toDateString() + ' ' + event.start_time);
+                let end_datetime = new Date(today.toDateString() + ' ' + event.end_time);
+                if (event.end_time < event.start_time) {
+                    const next_day = new Date(today.getTime() + 1000 * 60 * 60 * 24);
+                    end_datetime = new Date(next_day.toDateString() + ' ' + event.end_time);
+                }
+                if (today_str === cur_day_key && today >= start_datetime - 600000 && today <= end_datetime) {
+                    document.querySelector(".exclamation-mark").style.display = 'block';
+                    eventElement.style.fontWeight = 700;
+                }
+            });
+
+        document.querySelector("div.calendar-events-wrapper").appendChild(itemElement);
+        cur_date.setDate(cur_date.getDate() + 1);
+    }
+}
 
 function calcIconWrapperColor(color) {
     if (!color) return "rgba(0, 0, 0, 0.1)";
@@ -29,11 +87,13 @@ function updateBackgroundColor(color) {
     document.querySelector("#colorPicker").value = color;
     document.querySelector(".mod_box").style.backgroundColor = color;
     document.querySelector(".modify-theme-wrapper").style.backgroundColor = color;
+    document.querySelector(".calendar-events-wrapper").style.backgroundColor = color;
 
     let rgbValues = color ? color.match(/[\d.]+/g).map(Number) : [255, 255, 255];
     let fontColor = 0.299 * rgbValues[0] + 0.587 * rgbValues[1] + 0.114 * rgbValues[2] < 128 ? "white" : "rgb(32, 33, 36)";
     document.querySelectorAll("div").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("span").forEach(elem=> {elem.style.color = fontColor;});
+    document.querySelectorAll("a").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("div.mod_box input").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.color = fontColor;});
     
@@ -41,6 +101,7 @@ function updateBackgroundColor(color) {
     document.querySelectorAll("div.cell a").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
     document.querySelectorAll("div.mod_box input").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
     document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
+    document.querySelectorAll("div.calendar-events-wrapper span").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
     if(document.querySelector(".header-container a svg")) {
         document.querySelector(".header-container a svg").style.fill = wrapperColor;
         if (rgbValues[0] >= 250 && rgbValues[1] >= 250 && rgbValues[2] >= 250) {
@@ -210,6 +271,9 @@ document.body.addEventListener("mouseover", e => {
         e.target.classList.add("now_hovering");
         e.target.style.backgroundColor = blendColors(document.body.style.backgroundColor, "rgba(32, 33, 36, 0.1)");
     }
+
+    if (e.target === currentTimeElement || calendarWrapperElement.contains(e.target))
+        calendarWrapperElement.style.display = 'flex';
 });
 
 document.body.addEventListener("mouseout", e => {
@@ -224,6 +288,9 @@ document.body.addEventListener("mouseout", e => {
         cur_hover_elem.style.backgroundColor = "";
         cur_hover_elem = null;
     }
+
+    if ((calendarWrapperElement.contains(e.target) || currentTimeElement.contains(e.target)) && !calendarWrapperElement.contains(e.relatedTarget) && !currentTimeElement.contains(e.relatedTarget))
+        calendarWrapperElement.style.display = '';
 });
 
 async function get_folder(id)
@@ -249,7 +316,12 @@ class Main{
         this.folder_id = "";
         this.memos = {};
         this.weather_visibility = false;
-        API.storage.sync.get(null, (items) => {
+        API.storage.sync.get(null, async (items) => {
+            API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
+                console.log("Response:", response);
+                renderCalendarEvents(response.calendarEvents);
+                initializeBackgroundColor(items.backgroundColor);
+            });
             if ("memos" in items)
                 this.memos = JSON.parse(items.memos);
             if (!("weather_visibility" in items) || items.weather_visibility) {
@@ -681,18 +753,18 @@ function updateCurTime() {
 updateCurTime();
 setInterval(updateCurTime, 1000 * 60);
 
-API.storage.sync.get(['backgroundColor'], async items => {
+async function initializeBackgroundColor(backgroundColor) {
     const response = await fetch("../assets/img/logo.svg");
     document.querySelector(".header-container a").innerHTML =  await response.text();
     document.querySelector(".header-container a svg").classList.add("logo");
-    document.querySelector("#colorPicker").value = items.backgroundColor;
-    updateBackgroundColor(items.backgroundColor);
-    if (items.backgroundColor) {
-        var [r, g, b] = items.backgroundColor.match(/\d+/g).map(Number);
+    document.querySelector("#colorPicker").value = backgroundColor;
+    updateBackgroundColor(backgroundColor);
+    if (backgroundColor) {
+        var [r, g, b] = backgroundColor.match(/\d+/g).map(Number);
         picker.set(r, g, b, 1);
     } else 
         picker.set(255, 255, 255, 1);
-});
+}
 
 API.storage.local.get('backgroundImage', function(result) {
     if (result.backgroundImage) {
@@ -717,4 +789,11 @@ document.addEventListener('DOMContentLoaded', () => {
         el.textContent = API.i18n.getMessage(el.getAttribute('data-i18n'));
     });
     document.querySelector("div.bookmark-search input").placeholder =  API.i18n.getMessage("search_bookmarks");
+    calendarWrapperElement = document.querySelector(".calendar-events-wrapper");
+    currentTimeElement = document.querySelector("span.current-time");
+    var hoverRect = currentTimeElement.getBoundingClientRect();
+    calendarWrapperElement.style.top = hoverRect.bottom + 'px';
+    calendarWrapperElement.style.left = hoverRect.left + 'px'; 
+    document.querySelector(".exclamation-mark").style.top =  hoverRect.top + 'px';
+    document.querySelector(".exclamation-mark").style.left =  (hoverRect.right) + 'px';
 });

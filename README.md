@@ -5,10 +5,12 @@ You can view your bookmarks on the new tab page of your browser, and easily rear
 ## Main Features
 - Easy Bookmark Management: Drag and drop to organize, move, or delete bookmarks quickly.
 - Weather Updates: Get the forecast on your new tab page. You can turn off/on this feature from the option page.
+- Google Calendar Integration: Receive reminders on your new tab page. To see your upcoming calendar events, hover your mouse cursor over the current time display in the center of the page.
 
 ## Permissions
 - Bookmark Data: We collect information related to the bookmarks you save. This data is processed solely on your device.
 - Geolocation Data: We collect information related to your geolocation to offer weather forecast information. Your location is approximated to within about 10 km to protect your privacy. While this calculation is done on your device, the information is transmitted to [OpenWeatherMap](https://openweathermap.org/) API to provide the service.
+- Calendar Access: In order to display notifications and reminders from Google Calendar, we require access to your calendar data. This information is used solely to provide you with timely notifications.
 
 ## Screenshots
 <img width="640" src="https://github.com/kangwooklee29/bookmark-tab/assets/141019638/37f81d40-e0c1-47ab-baa4-06fae73c4b72">

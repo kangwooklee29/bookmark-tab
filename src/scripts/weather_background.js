@@ -188,3 +188,54 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
 
   return weather_info;
 }
+
+// Function to format a date in YYYY-MM-DD format
+function formatDate(date) {
+  return date.toISOString().split('T')[0];
+}
+
+// Function to get dates for the upcoming week
+function getUpcomingWeek() {
+  const today = new Date();
+  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  return { start: formatDate(today), end: formatDate(nextWeek) };
+}
+
+// Async function to fetch calendar events using fetch API and async/await
+async function fetchCalendarEvents(accessToken) {
+  const { start, end } = getUpcomingWeek();
+
+  try {
+      const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${start}T00:00:00Z&timeMax=${end}T00:00:00Z`, {
+          headers: {
+              'Authorization': `Bearer ${accessToken}`
+          }
+      });
+
+      if (!response.ok) {
+          throw new Error('Network response was not ok.');
+      }
+
+      const data = await response.json();
+      const events = data.items;
+      console.log('Upcoming events:', events);
+  } catch (error) {
+      console.error('Fetch error:', error);
+  }
+}
+
+const clientId = '427328739540-3jorcqa54ie31ilrliejf9ko15ctjdj1.apps.googleusercontent.com';
+
+// OAuth 2.0 인증 흐름 시작
+chrome.runtime.onInstalled.addListener(() => {
+  console.log(chrome.identity.getRedirectURL());
+    chrome.identity.launchWebAuthFlow({
+      url: `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&response_type=token&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar')}&redirect_uri=${encodeURIComponent(chrome.identity.getRedirectURL())}`,
+      interactive: true
+    }, (redirectUrl) => {
+        if (chrome.runtime.lastError || !redirectUrl) return;
+        const url = new URL(redirectUrl);
+        const accessToken = url.hash.match(/access_token=([^&]+)/)[1];
+        fetchCalendarEvents(accessToken);
+    });
+});

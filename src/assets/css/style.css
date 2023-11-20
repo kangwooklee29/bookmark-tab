@@ -445,14 +445,14 @@ div.color-example div {
 
 div.calendar-events-wrapper {
     display: none;
-    width: 400px;
+    width: 462px;
     height: 200px;
     border: 1px solid black;
     position: absolute;
 }
 
 div.calendar-day {
-    width: 57px;
+    width: 66px;
     height: 100px;
     overflow-y: auto;
     align-items: flex-start;

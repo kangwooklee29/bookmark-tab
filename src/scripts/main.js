@@ -42,14 +42,19 @@ function renderCalendarEvents(events) {
             cur_month++;
             cur_day_str = `${cur_month}/${cur_day_str}`;
         }
-        itemElement.innerHTML = `<span class="calendar-day-title">${cur_day_str}</span>`;
-
         const cur_day_key = `${cur_date.getMonth() + 1}/${cur_date.getDate()}`;
+        if (cur_day_key === today_str)
+            cur_day_str = `<b>${cur_day_str}</b>`;
+        if (cur_day_key < today_str)
+            itemElement.classList.add("past-day");
+        itemElement.innerHTML = `<span class="calendar-day-title">${cur_day_str}</span>`;
         if (eventObj[cur_day_key])
             eventObj[cur_day_key].forEach(event => {
                 const eventElement = document.createElement("a");
                 eventElement.innerHTML = `${event.start_time}-${event.end_time} / ${event.summary}`;
                 eventElement.href = event.htmlLink;
+                if (cur_day_key === today_str)
+                    eventElement.innerHTML = `<b>${eventElement.outerHTML}</b>`;
                 itemElement.appendChild(eventElement);
 
                 const start_datetime = new Date(today.toDateString() + ' ' + event.start_time);
@@ -102,6 +107,7 @@ function updateBackgroundColor(color) {
     document.querySelectorAll("div.mod_box input").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
     document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
     document.querySelectorAll("div.calendar-events-wrapper span").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
+    document.querySelectorAll("div.past-day").forEach(elem=> {elem.style.backgroundColor = wrapperColor;});
     if(document.querySelector(".header-container a svg")) {
         document.querySelector(".header-container a svg").style.fill = wrapperColor;
         if (rgbValues[0] >= 250 && rgbValues[1] >= 250 && rgbValues[2] >= 250) {
@@ -317,6 +323,8 @@ class Main{
         this.memos = {};
         this.weather_visibility = false;
         API.storage.sync.get(null, async (items) => {
+            document.body.style.backgroundColor = items.backgroundColor;
+            document.body.style.backgroundImage = "";
             API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
                 console.log("Response:", response);
                 renderCalendarEvents(response.calendarEvents);
@@ -796,4 +804,5 @@ document.addEventListener('DOMContentLoaded', () => {
     calendarWrapperElement.style.left = hoverRect.left + 'px'; 
     document.querySelector(".exclamation-mark").style.top =  hoverRect.top + 'px';
     document.querySelector(".exclamation-mark").style.left =  (hoverRect.right) + 'px';
+    calendarWrapperElement.style.display = 'flex';
 });

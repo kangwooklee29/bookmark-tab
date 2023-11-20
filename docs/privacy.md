@@ -8,6 +8,7 @@ This Privacy Policy outlines how the Bookmark Tab extension collects, uses, and 
 - Storage Data: We store information necessary for your preferences and extension settings in your device's local storage.
 - Alarms Data: We collect information on the alarms set by the extension, which remains on your device.
 - Geolocation Data: We collect information related to your geolocation to offer weather forecast information. While the initial calculation is done on your device, the information is transmitted to OpenWeatherMap API to provide the service.
+- Calendar Data: We collect information related to your Google Calendar events and reminders. This data is processed solely on your device.
 
 ## Methods of Local Data Collection
 - When you use the extension to add, modify, or delete bookmarks, this is done entirely on your device.
@@ -18,6 +19,7 @@ This Privacy Policy outlines how the Bookmark Tab extension collects, uses, and 
 - Preference Storage: To save your settings and personalize your extension experience, with all data remaining on your device.
 - Notification Services: To provide you with periodic weather forecast updates, processed locally without involving external servers.
 - Geolocation Services: To offer accurate weather forecast information, your current location is initially processed on your device for enhanced privacy. However, to provide detailed forecasts, this data is transmitted to OpenWeatherMap API.
+- Calendar Integration: To display your calendar events and reminders within the extension.
 
 ## Sharing of Information
 - We collect geolocation data, process it locally to reduce accuracy to 10km, and share this data with OpenWeatherMap for weather services.

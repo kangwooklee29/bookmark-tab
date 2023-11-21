@@ -344,6 +344,7 @@ class Main{
             updateBackgroundColor(items.backgroundColor);
             API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
                 console.log("Response:", response);
+                calendarWrapperElement.style.display = 'flex';
                 renderCalendarEvents(response.calendarEvents);
                 initializeBackgroundColor(items.backgroundColor);
             });
@@ -821,5 +822,4 @@ document.addEventListener('DOMContentLoaded', () => {
     calendarWrapperElement.style.left = hoverRect.left + 'px'; 
     document.querySelector(".exclamation-mark").style.top =  hoverRect.top + 'px';
     document.querySelector(".exclamation-mark").style.left =  (hoverRect.right) + 'px';
-    calendarWrapperElement.style.display = 'flex';
 });

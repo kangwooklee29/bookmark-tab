@@ -15,9 +15,7 @@ API.runtime.onMessage.addListener(
         });  
       });
     } else if (request.greeting === "fetchCalendarEvents") {
-      console.log(request);
       fetchCalendarEvents(now, new Date(request.calendarUpdateTime), request.calendarEvents).then(response => {
-        console.log(response);
         API.storage.sync.set({ calendarEvents: response.events, calendarUpdateTime: response.update_datetime }, () => {
           sendResponse({farewell: true, calendarEvents: response.events});
         });
@@ -155,6 +153,8 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
       records.push(...res_json.list.slice(1));
     else
       records.push(...res_json.list);
+  } else if (cur_date - stored_date < 3600000){
+    console.log(cur_date, stored_date, cur_date - stored_date)
   }
 
   const pty = [], tmp = [], pcp = [], pop = [], time = [];
@@ -237,9 +237,10 @@ async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
   const nextWeek = new Date(cur_date.getTime() + 14 * 24 * 60 * 60 * 1000);
   const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${formatDate(cur_date)}T00:00:00Z&timeMax=${formatDate(nextWeek)}T00:00:00Z`;
   let events = [];
+  let response = [];
   for (let i = 0; i < 5; i++) {
     try {
-      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${calendarAccessToken}` } });
+      response = await fetch(url, { headers: { 'Authorization': `Bearer ${calendarAccessToken}` } });
       const data = await response.json();
       events = data.items;
       break;
@@ -252,6 +253,8 @@ async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
   }
   if (!events) {
     console.error('Failed to fetch calendar info', response);
+    calendarAccessToken = null;
+    API.storage.sync.set({calendarAccessToken: null});  
     return {events: events, update_datetime: stored_date};
   }
   return {events: events, update_datetime: cur_date};

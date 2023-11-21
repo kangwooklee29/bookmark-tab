@@ -41,6 +41,10 @@ chrome.alarms.onAlarm.addListener(() => {
     API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: now.getTime() }, () => {
       console.log("done");
     });
+    const calendarEvents  = await fetchCalendarEvents(now, new Date(items.calendarUpdateTime), items.calendarEvents);
+    API.storage.sync.set({ calendarEvents: calendarEvents, calendarUpdateTime: now.getTime() }, () => {
+      console.log("done");
+    });
   });
 });
 
@@ -228,18 +232,19 @@ async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
   }
 
   const nextWeek = new Date(cur_date.getTime() + 14 * 24 * 60 * 60 * 1000);
-  const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${formatDate(cur_date)}T00:00:00Z&timeMax=${formatDate(nextWeek)}T00:00:00Z`, {
-    headers: { 'Authorization': `Bearer ${calendarAccessToken}` }
-  });
-
-  let events = [];
-  if (response.ok) {
-    const data = await response.json();
-    events = data.items;
-  } else {
-    console.log(response, cur_date, nextWeek);
-    alert("calendar api no response");
+  const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${formatDate(cur_date)}T00:00:00Z&timeMax=${formatDate(nextWeek)}T00:00:00Z`;
+  for (let i = 0; i < 5; i++) {
+    try {
+      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${calendarAccessToken}` } });
+      const data = await response.json();
+      return data.items;
+    } catch (error) {
+      if (i < 4) { // 마지막 시도에서는 대기하지 않음
+        console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
   }
-
-  return events;
+  console.error('Failed to fetch calendar info', response);
+  return [];
 }

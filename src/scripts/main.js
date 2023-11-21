@@ -53,8 +53,12 @@ function renderCalendarEvents(events) {
                 const eventElement = document.createElement("a");
                 eventElement.innerHTML = `${event.start_time}-${event.end_time} / ${event.summary}`;
                 eventElement.href = event.htmlLink;
-                if (cur_day_key === today_str && today.toTimeString().slice(0, 5) < event.end_time)
-                    eventElement.innerHTML = `<b>${eventElement.outerHTML}</b>`;
+                if (cur_day_key === today_str) { 
+                    if (today.toTimeString().slice(0, 5) < event.end_time)
+                        eventElement.innerHTML = `<b>${eventElement.outerHTML}</b>`;
+                    else
+                        eventElement.innerHTML = `<i>${eventElement.outerHTML}</i>`;
+                }
                 itemElement.appendChild(eventElement);
 
                 const start_datetime = new Date(today.toDateString() + ' ' + event.start_time);

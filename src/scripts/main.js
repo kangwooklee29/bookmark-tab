@@ -53,7 +53,7 @@ function renderCalendarEvents(events) {
         if (eventObj[cur_day_key])
             eventObj[cur_day_key].forEach(event => {
                 const eventElement = document.createElement("a");
-                eventElement.innerHTML = `${event.start_time}-${event.end_time} / ${event.summary}`;
+                eventElement.innerHTML = `${event.start_time}-${event.end_time}<br>/${event.summary}`;
                 eventElement.href = event.htmlLink;
                 if (cur_day_key === today_str) { 
                     if (today.toTimeString().slice(0, 5) < event.end_time)
@@ -341,8 +341,7 @@ class Main{
         this.memos = {};
         this.weather_visibility = false;
         API.storage.sync.get(null, async (items) => {
-            document.body.style.backgroundColor = items.backgroundColor;
-            document.body.style.backgroundImage = "";
+            updateBackgroundColor(items.backgroundColor);
             API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
                 console.log("Response:", response);
                 renderCalendarEvents(response.calendarEvents);

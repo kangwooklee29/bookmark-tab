@@ -9,15 +9,15 @@ API.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     const now = new Date();
     if (request.greeting === "fetchWeather") {
-      update_weather(now, new Date(request.weather_info_datetime), request.weather_loc, request.weather_info).then(weather_info => {
-        API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: now.getTime(), weather_loc: request.weather_loc }, () => {
-          sendResponse({farewell: true, weather_info: weather_info});
+      update_weather(now, new Date(request.weather_info_datetime), request.weather_loc, request.weather_info).then(response => {
+        API.storage.sync.set({ weather_info: response.weather_info, weather_info_datetime: response.update_datetime, weather_loc: request.weather_loc }, () => {
+          sendResponse({farewell: true, weather_info: response.weather_info});
         });  
       });
     } else if (request.greeting === "fetchCalendarEvents") {
-      fetchCalendarEvents(now, new Date(request.calendarUpdateTime), request.calendarEvents).then(calendarEvents => {
-        API.storage.sync.set({ calendarEvents: calendarEvents, calendarUpdateTime: now.getTime() }, () => {
-          sendResponse({farewell: true, calendarEvents: calendarEvents});
+      fetchCalendarEvents(now, new Date(request.calendarUpdateTime), request.calendarEvents).then(response => {
+        API.storage.sync.set({ calendarEvents: response.events, calendarUpdateTime: response.update_datetime }, () => {
+          sendResponse({farewell: true, calendarEvents: response.events});
         });
       });
     }
@@ -37,13 +37,15 @@ function setAlarmForNextHour() {
 chrome.alarms.onAlarm.addListener(() => {
   API.storage.sync.get(null, async (items) => {
     let now = new Date();
-    const weather_info = await update_weather(now, new Date(items.weather_info_datetime), items.weather_loc, items.weather_info);
-    API.storage.sync.set({ weather_info: weather_info, weather_info_datetime: now.getTime() }, () => {
-      console.log("done");
+    update_weather(now, new Date(items.weather_info_datetime), items.weather_loc, items.weather_info).then(response => {
+      API.storage.sync.set({ weather_info: response.weather_info, weather_info_datetime: response.update_datetime }, () => {
+        console.log("done");
+      });  
     });
-    const calendarEvents  = await fetchCalendarEvents(now, new Date(items.calendarUpdateTime), items.calendarEvents);
-    API.storage.sync.set({ calendarEvents: calendarEvents, calendarUpdateTime: now.getTime() }, () => {
-      console.log("done");
+    fetchCalendarEvents(now, new Date(items.calendarUpdateTime), items.calendarEvents).then(response => {
+      API.storage.sync.set({ calendarEvents: response.events, calendarUpdateTime: response.update_datetime }, () => {
+        console.log("done");
+      });
     });
   });
 });
@@ -89,7 +91,7 @@ function get_icon_str(is_day, pty) {
 async function update_weather(cur_date, stored_date, weather_loc, prev_weather_info) {
   const weather_info = [], records = [];
 
-  if (cur_date.getHours() === stored_date.getHours()) return prev_weather_info;
+  if (cur_date.getHours() === stored_date.getHours()) return {weather_info: prev_weather_info, update_datetime: stored_date};
 
   if (!config) {
     const response = await fetch('../../weather_api_key.json');
@@ -196,7 +198,7 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
   if (cnt === 1)
     weather_info.push(...prev_weather_info.slice(1));
 
-  return weather_info;
+  return {weather_info: weather_info, update_datetime: cur_date};
 }
 
 function formatDate(date) {
@@ -207,7 +209,7 @@ function formatDate(date) {
 }
 
 async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
-  if (cur_date.getHours() === stored_date.getHours() && cur_date - stored_date <= 1000 * 60 * 5) return stored_events;
+  if (cur_date.getHours() === stored_date.getHours() && cur_date - stored_date <= 1000 * 60 * 5) return {events: stored_events, update_datetime: stored_date};
 
   if (!calendarAccessToken) {
     const items = await API.storage.sync.get(["calendarAccessToken"]);
@@ -232,11 +234,13 @@ async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
 
   const nextWeek = new Date(cur_date.getTime() + 14 * 24 * 60 * 60 * 1000);
   const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${formatDate(cur_date)}T00:00:00Z&timeMax=${formatDate(nextWeek)}T00:00:00Z`;
+  let events = [];
   for (let i = 0; i < 5; i++) {
     try {
       const response = await fetch(url, { headers: { 'Authorization': `Bearer ${calendarAccessToken}` } });
       const data = await response.json();
-      return data.items;
+      events = data.items;
+      break;
     } catch (error) {
       if (i < 4) { // 마지막 시도에서는 대기하지 않음
         console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
@@ -244,6 +248,9 @@ async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
       }
     }
   }
-  console.error('Failed to fetch calendar info', response);
-  return [];
+  if (!events) {
+    console.error('Failed to fetch calendar info', response);
+    return {events: events, update_datetime: stored_date};
+  }
+  return {events: events, update_datetime: cur_date};
 }

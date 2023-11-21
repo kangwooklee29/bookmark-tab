@@ -13,6 +13,8 @@ let cur_hover_elem = null;
 let debounceTimer = null;
 
 function renderCalendarEvents(events) {
+    document.querySelector("div.calendar-events-wrapper").innerHTML = "";
+
     const eventObj = {};
     for (const event of events) {
         const start_date = event.start.dateTime.split("T");
@@ -282,8 +284,20 @@ document.body.addEventListener("mouseover", e => {
         e.target.style.backgroundColor = blendColors(document.body.style.backgroundColor, "rgba(32, 33, 36, 0.1)");
     }
 
-    if (e.target === currentTimeElement || calendarWrapperElement.contains(e.target))
+    if ((e.target === currentTimeElement || calendarWrapperElement.contains(e.target)) && calendarWrapperElement.style.display !== 'flex') {
         calendarWrapperElement.style.display = 'flex';
+        if (debounceTimer)
+            clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            API.storage.sync.get(["calendarUpdateTime", "calendarEvents", "backgroundColor"], items => {
+                API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
+                    console.log("Response:", response);
+                    renderCalendarEvents(response.calendarEvents);
+                    initializeBackgroundColor(items.backgroundColor);
+                });
+            });
+        }, 3000);
+    }
 });
 
 document.body.addEventListener("mouseout", e => {

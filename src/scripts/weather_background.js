@@ -207,8 +207,7 @@ function formatDate(date) {
 }
 
 async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
-  if (cur_date.getHours() === stored_date.getHours() && cur_date - stored_date <= 3600000) return stored_events;
-  else console.log(cur_date.getHours(), stored_date.getHours(), cur_date - stored_date);
+  if (cur_date.getHours() === stored_date.getHours() && cur_date - stored_date <= 1000 * 60 * 5) return stored_events;
 
   if (!calendarAccessToken) {
     const items = await API.storage.sync.get(["calendarAccessToken"]);

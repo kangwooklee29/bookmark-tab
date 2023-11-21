@@ -53,7 +53,7 @@ function renderCalendarEvents(events) {
                 const eventElement = document.createElement("a");
                 eventElement.innerHTML = `${event.start_time}-${event.end_time} / ${event.summary}`;
                 eventElement.href = event.htmlLink;
-                if (cur_day_key === today_str)
+                if (cur_day_key === today_str && today.toTimeString().slice(0, 5) < event.end_time)
                     eventElement.innerHTML = `<b>${eventElement.outerHTML}</b>`;
                 itemElement.appendChild(eventElement);
 

@@ -227,7 +227,7 @@ async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
       calendarAccessToken = items.calendarAccessToken;
   }
 
-  const nextWeek = new Date(cur_date.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const nextWeek = new Date(cur_date.getTime() + 14 * 24 * 60 * 60 * 1000);
   const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${formatDate(cur_date)}T00:00:00Z&timeMax=${formatDate(nextWeek)}T00:00:00Z`, {
     headers: { 'Authorization': `Bearer ${calendarAccessToken}` }
   });
@@ -236,6 +236,9 @@ async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
   if (response.ok) {
     const data = await response.json();
     events = data.items;
+  } else {
+    console.log(response, cur_date, nextWeek);
+    alert("calendar api no response");
   }
 
   return events;

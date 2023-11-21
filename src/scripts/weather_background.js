@@ -15,7 +15,9 @@ API.runtime.onMessage.addListener(
         });  
       });
     } else if (request.greeting === "fetchCalendarEvents") {
+      console.log(request);
       fetchCalendarEvents(now, new Date(request.calendarUpdateTime), request.calendarEvents).then(response => {
+        console.log(response);
         API.storage.sync.set({ calendarEvents: response.events, calendarUpdateTime: response.update_datetime }, () => {
           sendResponse({farewell: true, calendarEvents: response.events});
         });

@@ -17,5 +17,6 @@
     "search_bookmarks": { "message": "Search bookmarks"},
     "background_img": { "message": "Background img"},
     "background_color": { "message": "Background color"},
-    "click_to_upload": { "message": "Click to upload"}
+    "click_to_upload": { "message": "Click to upload"},
+    "use_calendar": { "message": "Use Google Calendar"}
 }

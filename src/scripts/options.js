@@ -17,6 +17,7 @@ function calcButtonBgColor(color) {
 async function restoreOptions() {
     const items = await API.storage.sync.get(null);
     document.querySelector('#weather_visibility_checkbox').checked = !!items.weather_visibility;
+    document.querySelector('#use_calendar_checkbox').checked = !!items.use_calendar;
     document.querySelector("#restore_backup textarea").value = JSON.stringify(items);
 
     const color = items.backgroundColor ? items.backgroundColor : "rgb(255, 255, 255)";
@@ -48,6 +49,10 @@ function initializeEventListeners() {
     document.addEventListener('change', (event) => {
         if (event.target.matches('#weather_visibility_checkbox')) {
             API.storage.sync.set({ weather_visibility: event.target.checked });
+        }
+
+        if (event.target.matches('#use_calendar_checkbox')) {
+            API.storage.sync.set({ use_calendar: event.target.checked });
         }
     });
 }

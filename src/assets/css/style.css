@@ -445,14 +445,14 @@ div.color-example div {
 
 div.calendar-events-wrapper {
     display: none;
-    width: 483px;
+    width: 490px;
     height: 200px;
     border: 1px solid black;
     position: absolute;
 }
 
 div.calendar-day {
-    width: 69px;
+    width: 70px;
     height: 100px;
     overflow-y: auto;
     align-items: flex-start;
@@ -476,4 +476,8 @@ b.exclamation-mark {
     display: none;
     width: 13px;
     font-size: 8pt;
+}
+
+i {
+    font-weight: 100;
 }

@@ -12,14 +12,19 @@ let cur_hover_elem = null;
 
 let debounceTimer = null;
 
+let use_calendar = null;
+
 function renderCalendarEvents(events) {
     document.querySelector("div.calendar-events-wrapper").innerHTML = "";
+    if (!events) return;
 
     const eventObj = {};
     for (const event of events) {
-        const start_date = event.start.dateTime.split("T");
-        const start_date_mm_dd = start_date[0].substring(5).replace("-", "/");
-        const new_elem = {start_time: start_date[1].substring(0, 5), end_time: event.end.dateTime.split("T")[1].substring(0, 5), summary: event.summary, htmlLink: event.htmlLink};
+        const start_date = event.start.dateTime ? new Date(event.start.dateTime) : new Date(event.start.date);
+        const start_date_mm_dd = `${String(start_date.getMonth() + 1).padStart(2, '0')}/${String(start_date.getDate()).padStart(2, '0')}`;
+        const start_time = event.start.dateTime ? event.start.dateTime.split("T")[1].substring(0, 5) : "00:00";
+        const end_time = event.end.dateTime ? event.end.dateTime.split("T")[1].substring(0, 5) : "00:00";
+        const new_elem = {start_time: start_time, end_time: end_time, summary: event.summary, htmlLink: event.htmlLink};
         if (eventObj[start_date_mm_dd])
             eventObj[start_date_mm_dd].push(new_elem);
         else
@@ -31,7 +36,7 @@ function renderCalendarEvents(events) {
     }));
 
     let today = new Date();
-    let today_str = `${today.getMonth() + 1}/${today.getDate()}`;
+    let today_str = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
     let cur_date = new Date();
     cur_date.setDate(cur_date.getDate() - cur_date.getDay());
     let cur_month = cur_date.getMonth() + 1;
@@ -44,7 +49,7 @@ function renderCalendarEvents(events) {
             cur_month++;
             cur_day_str = `${cur_month}/${cur_day_str}`;
         }
-        const cur_day_key = `${cur_date.getMonth() + 1}/${cur_date.getDate()}`;
+        const cur_day_key = `${String(cur_date.getMonth() + 1).padStart(2, '0')}/${String(cur_date.getDate()).padStart(2, '0')}`;
         if (cur_day_key === today_str)
             cur_day_str = `<b>${cur_day_str}</b>`;
         if (cur_day_key < today_str)
@@ -53,14 +58,19 @@ function renderCalendarEvents(events) {
         if (eventObj[cur_day_key])
             eventObj[cur_day_key].forEach(event => {
                 const eventElement = document.createElement("a");
-                eventElement.innerHTML = `${event.start_time}-${event.end_time}<br>/${event.summary}`;
+                if (event.start_time !== "00:00")
+                    eventElement.innerHTML = `${event.start_time}-${event.end_time}<br>/${event.summary}`;
+                else
+                    eventElement.innerHTML = event.summary;
                 eventElement.href = event.htmlLink;
                 if (cur_day_key === today_str) { 
                     if (today.toTimeString().slice(0, 5) < event.end_time)
                         eventElement.innerHTML = `<b>${eventElement.outerHTML}</b>`;
-                    else
+                    else if (event.end_time !== "00:00")
                         eventElement.innerHTML = `<i>${eventElement.outerHTML}</i>`;
                 }
+                if (cur_day_key < today_str)
+                    eventElement.innerHTML = `<i>${eventElement.outerHTML}</i>`;
                 itemElement.appendChild(eventElement);
 
                 const start_datetime = new Date(today.toDateString() + ' ' + event.start_time);
@@ -284,7 +294,7 @@ document.body.addEventListener("mouseover", e => {
         e.target.style.backgroundColor = blendColors(document.body.style.backgroundColor, "rgba(32, 33, 36, 0.1)");
     }
 
-    if ((e.target === currentTimeElement || calendarWrapperElement.contains(e.target)) && calendarWrapperElement.style.display !== 'flex') {
+    if ((e.target === currentTimeElement || calendarWrapperElement.contains(e.target)) && calendarWrapperElement.style.display !== 'flex' && use_calendar) {
         calendarWrapperElement.style.display = 'flex';
         if (debounceTimer)
             clearTimeout(debounceTimer);
@@ -341,13 +351,17 @@ class Main{
         this.memos = {};
         this.weather_visibility = false;
         API.storage.sync.get(null, async (items) => {
+            use_calendar = items.use_calendar;
             updateBackgroundColor(items.backgroundColor);
-            API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
-                console.log("Response:", response);
-                calendarWrapperElement.style.display = 'flex';
-                renderCalendarEvents(response.calendarEvents);
-                initializeBackgroundColor(items.backgroundColor);
-            });
+            if (use_calendar || !("use_calendar" in items))
+                API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
+                    console.log("Response:", response);
+                    use_calendar = response.use_calendar;
+                    if (use_calendar)
+                        calendarWrapperElement.style.display = 'flex';
+                    renderCalendarEvents(response.calendarEvents);
+                    initializeBackgroundColor(items.backgroundColor);
+                });
             if ("memos" in items)
                 this.memos = JSON.parse(items.memos);
             if (!("weather_visibility" in items) || items.weather_visibility) {

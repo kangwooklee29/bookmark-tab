@@ -17,5 +17,6 @@
     "search_bookmarks": { "message": "북마크 검색"},
     "background_img": { "message": "배경 이미지"},
     "background_color": { "message": "배경 색깔"},
-    "click_to_upload": { "message": "파일 업로드"}
+    "click_to_upload": { "message": "파일 업로드"},
+    "use_calendar": { "message": "구글 캘린더 사용"}
 }

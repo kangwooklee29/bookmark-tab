@@ -9,7 +9,6 @@
     "cancel": { "message": "Cancel"},
     "confirm": { "message": "Confirm"},
     "weather_visibility": { "message": "Weather Visibility"},
-    "location_consent": { "message": "Ask Location Consent"},
     "save": { "message": "SAVE"},
     "restore": { "message": "RESTORE" },
     "restore_backup": { "message": "Restore Back-up"},

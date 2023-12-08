@@ -9,8 +9,10 @@ You can view your bookmarks on the new tab page of your browser, and easily rear
 
 ## Permissions
 - Bookmark Data: We collect information related to the bookmarks you save. This data is processed solely on your device.
-- Geolocation Data: We collect information related to your geolocation to offer weather forecast information. Your location is approximated to within about 10 km to protect your privacy. While this calculation is done on your device, the information is transmitted to [OpenWeatherMap](https://openweathermap.org/) API to provide the service.
 - Calendar Access: In order to display notifications and reminders from Google Calendar, we require access to your calendar data. This information is used solely to provide you with timely notifications.
+
+## Notes
+- We collect information related to your geolocation to offer weather forecast information. Your location is approximated based on your IP address. The approximated information is transmitted to [OpenWeatherMap](https://openweathermap.org/) API to provide the service.
 
 ## Screenshots
 <img width="640" src="https://github.com/kangwooklee29/bookmark-tab/assets/141019638/37f81d40-e0c1-47ab-baa4-06fae73c4b72">

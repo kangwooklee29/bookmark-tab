@@ -65,17 +65,16 @@ async function displayWeather(weatherInfo) {
 
 
 async function fetch_weather_loc() {
-  const position = await new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(resolve, reject);
-  });
+  const ipResponse = await fetch('https://api64.ipify.org/?format=json');
+  const ipData = await ipResponse.json();
+
+  const locationResponse = await fetch(`https://ipapi.co/${ipData.ip}/json/`);
+  const locData = await locationResponse.json();
   
-  return position.coords;
+  console.log(locData);
+  return locData;
 }
 
-
-const date = new Date();
-const offset = date.getTimezoneOffset() * 60000;
-const cur_date_str = (new Date(date - offset)).toISOString().slice(0, 13);
 
 function fetch_and_run(items) {
   API.runtime.sendMessage( {greeting: "fetchWeather", weather_loc: {latitude: items.weather_loc.latitude, longitude: items.weather_loc.longitude}, weather_info_datetime: items.weather_info_datetime, weather_info: items.weather_info}, async function(response) {
@@ -91,13 +90,12 @@ API.storage.sync.get(['weather_info_datetime', 'weather_info', 'weather_loc'], a
     fetch_and_run({weather_loc: weather_loc, weather_info: items.weather_info, weather_info_datetime: items.weather_info_datetime});
   } else {
     fetch_and_run({weather_loc: weather_loc, weather_info: items.weather_info, weather_info_datetime: items.weather_info_datetime});
-    navigator.geolocation.getCurrentPosition(pos => {
-      const new_loc = { latitude: Math.round(pos.coords.latitude * 10) / 10, longitude: Math.round(pos.coords.longitude * 10) / 10}
-      if (new_loc.latitude != weather_loc.latitude || new_loc.longitude != weather_loc.longitude) {
-        document.getElementById('weatherTable').innerHTML = "";
-        fetch_and_run({weather_loc: new_loc, weather_info: items.weather_info, weather_info_datetime: items.weather_info_datetime});
-        API.storage.sync.set({ weather_loc: new_loc});
-      }
-    });
+    if (new Date().getTime() - items.weather_info_datetime <= 1000 * 60 * 60) return;
+    const new_loc = await fetch_weather_loc();
+    if (new_loc.latitude != weather_loc.latitude || new_loc.longitude != weather_loc.longitude) {
+      document.getElementById('weatherTable').innerHTML = "";
+      fetch_and_run({weather_loc: new_loc, weather_info: items.weather_info, weather_info_datetime: items.weather_info_datetime});
+      API.storage.sync.set({ weather_loc: new_loc});
+    }
   }
 });

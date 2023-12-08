@@ -33,9 +33,7 @@ async function restoreOptions() {
 // Initialize event listeners
 function initializeEventListeners() {
     document.addEventListener('click', (event) => {
-        if (event.target.matches('#location_consent button')) {
-            navigator.geolocation.getCurrentPosition(() => {});
-        } else if (event.target.matches('#restore_backup button')) {
+        if (event.target.matches('#restore_backup button')) {
             try {
                 API.storage.sync.set(JSON.parse(document.querySelector("#restore_backup textarea").value), () => {
                     window.location.href = window.location.href.split("?")[0];

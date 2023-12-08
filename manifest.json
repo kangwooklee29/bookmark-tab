@@ -9,7 +9,7 @@
     "chrome_url_overrides" : {
         "newtab": "src/pages/index.html"
       },
-    "permissions": ["bookmarks", "storage", "alarms", "geolocation", "identity"],
+    "permissions": ["bookmarks", "storage", "alarms", "identity"],
     "options_page": "src/pages/options.html",
     "default_locale": "en",
     "background": {

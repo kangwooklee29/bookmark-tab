@@ -52,7 +52,7 @@ function renderCalendarEvents(events) {
         const cur_day_key = `${String(cur_date.getMonth() + 1).padStart(2, '0')}/${String(cur_date.getDate()).padStart(2, '0')}`;
         if (cur_day_key === today_str)
             cur_day_str = `<b>${cur_day_str}</b>`;
-        if (cur_day_key < today_str)
+        if (cur_day_key < today_str && !(cur_day_key.substring(0, 2) === "01" && today_str.substring(0, 2) === "12"))
             itemElement.classList.add("past-day");
         itemElement.innerHTML = `<span class="calendar-day-title">${cur_day_str}</span>`;
         if (eventObj[cur_day_key])
@@ -69,7 +69,7 @@ function renderCalendarEvents(events) {
                     else if (event.end_time !== "00:00")
                         eventElement.innerHTML = `<i>${eventElement.outerHTML}</i>`;
                 }
-                if (cur_day_key < today_str)
+                if (itemElement.classList.contains("past-day"))
                     eventElement.innerHTML = `<i>${eventElement.outerHTML}</i>`;
                 itemElement.appendChild(eventElement);
 

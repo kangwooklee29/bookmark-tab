@@ -91,7 +91,7 @@ function renderCalendarEvents(events) {
 }
 
 function calcIconWrapperColor(color) {
-    if (!color) return "rgba(0, 0, 0, 0.1)";
+    if (!color) color = "rgb(255, 255, 255)";
     let ov = color.match(/[\d.]+/g).map(Number);
     const mod = ov.map(value => {
         let normalizedValue = value / 257;
@@ -299,11 +299,12 @@ document.body.addEventListener("mouseover", e => {
         if (debounceTimer)
             clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            API.storage.sync.get(["calendarUpdateTime", "calendarEvents", "backgroundColor"], items => {
-                API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
+            API.storage.sync.get(["calendarUpdateTime", "calendarEvents", "backgroundColor", "calendarAccessToken", "now_fetching_calendar_info"], items => {
+                if (items.now_fetching_calendar_info) return;
+                API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents, calendarAccessToken: items.calendarAccessToken, session_id: items.session_id}, function(response) {
                     console.log("Response:", response);
                     renderCalendarEvents(response.calendarEvents);
-                    initializeBackgroundColor(items.backgroundColor);
+                    updateBackgroundColor(items.backgroundColor);
                 });
             });
         }, 3000);
@@ -352,15 +353,16 @@ class Main{
         this.weather_visibility = false;
         API.storage.sync.get(null, async (items) => {
             use_calendar = items.use_calendar;
+            initializeBackgroundColor(items.backgroundColor);
             updateBackgroundColor(items.backgroundColor);
-            if (use_calendar || !("use_calendar" in items))
-                API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents}, function(response) {
+            if (use_calendar)
+                API.runtime.sendMessage( {greeting: "fetchCalendarEvents", calendarUpdateTime: items.calendarUpdateTime, calendarEvents: items.calendarEvents, calendarAccessToken: items.calendarAccessToken, session_id: items.session_id}, function(response) {
                     console.log("Response:", response);
                     use_calendar = response.use_calendar;
                     if (use_calendar)
                         calendarWrapperElement.style.display = 'flex';
                     renderCalendarEvents(response.calendarEvents);
-                    initializeBackgroundColor(items.backgroundColor);
+                    updateBackgroundColor(items.backgroundColor);
                 });
             if ("memos" in items)
                 this.memos = JSON.parse(items.memos);
@@ -798,7 +800,6 @@ async function initializeBackgroundColor(backgroundColor) {
     document.querySelector(".header-container a").innerHTML =  await response.text();
     document.querySelector(".header-container a svg").classList.add("logo");
     document.querySelector("#colorPicker").value = backgroundColor;
-    updateBackgroundColor(backgroundColor);
     if (backgroundColor) {
         var [r, g, b] = backgroundColor.match(/\d+/g).map(Number);
         picker.set(r, g, b, 1);

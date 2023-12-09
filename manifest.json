@@ -16,7 +16,7 @@
       "service_worker": "src/scripts/weather_background.js"
     },
     "host_permissions": [
-      "https://www.googleapis.com/"
+      "https://asia-northeast3-project-for-bookmark-tab.cloudfunctions.net/*"
     ],
     "key": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS1NSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQWgwcjNqS3NySVhzbjdyYnNLNjFrbk9VVDlmS1BFdDZnSGVJalQyNWZubzlncXhWWnRISFlBeXIxKzg2QjRTQzBFWUtoblBEZzNsUCtNQlVVZmJsdFdlYS91bGRySUhlZ2dlSVV0WS9LT2VxSmlHKzQ1QVRuVFR3eUx0ODUwa2pNejU4Z2lwTFdCM0VFSi9aVFhPMWljM005bUFOM1dPQVRtWksrNXV3U2wvSjlnT05wc3JTK3FNR1gydmtoV1NUU01VL3hKdVE0c09SYVNrMGdWU05OUGNxUTlBY2VJU1dwbFJ0Yll2RU5KcndncXVYU3dHZzI4VGdydDllWk10bU4yTFNoMEdSUFJLN1NXSEM4M1pzS1hselpvQlNGTDEraFFlL3VZN1hKdWxPREJHdHhFQ0loMWQwdUpMMzVxd0NEc0UzTEdTWWJsbWtmZ1VpY1pNTE90d0lEQVFBQg=="
 }

@@ -31,16 +31,10 @@ main > div > div {
 
 button {
     border: 1px solid black;
+    height: 21px;
+    width: 50px;
 }
 
-#restore_backup div {
-    flex-direction: column;
-}
-
-#restore_backup > div > * {
-    width: 80%;
-}
-
-#restore_backup > div > div {
-    align-items: flex-end;
+#location {
+    width: 300px;
 }

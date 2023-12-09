@@ -1,5 +1,6 @@
 // Use feature detection for API compatibility
 const API = (typeof browser === "undefined") ? chrome : browser;
+const serverUrl = "https://asia-northeast3-project-for-bookmark-tab.cloudfunctions.net/get_access_token";
 
 function calcButtonBgColor(color) {
     if (!color) return "rgba(0, 0, 0, 0.1)";
@@ -18,7 +19,8 @@ async function restoreOptions() {
     const items = await API.storage.sync.get(null);
     document.querySelector('#weather_visibility_checkbox').checked = !!items.weather_visibility;
     document.querySelector('#use_calendar_checkbox').checked = !!items.use_calendar;
-    document.querySelector("#restore_backup textarea").value = JSON.stringify(items);
+    if (items.formatted_address)
+        document.querySelector('#location').value = items.formatted_address;
 
     const color = items.backgroundColor ? items.backgroundColor : "rgb(255, 255, 255)";
     let rgbValues = color.match(/[\d.]+/g).map(Number);
@@ -32,26 +34,33 @@ async function restoreOptions() {
 
 // Initialize event listeners
 function initializeEventListeners() {
-    document.addEventListener('click', (event) => {
-        if (event.target.matches('#restore_backup button')) {
-            try {
-                API.storage.sync.set(JSON.parse(document.querySelector("#restore_backup textarea").value), () => {
-                    window.location.href = window.location.href.split("?")[0];
-                });
-            } catch (e) {
-                console.error(e);
-            }
-        }
-    });
-
     document.addEventListener('change', (event) => {
         if (event.target.matches('#weather_visibility_checkbox')) {
             API.storage.sync.set({ weather_visibility: event.target.checked });
         }
 
         if (event.target.matches('#use_calendar_checkbox')) {
-            API.storage.sync.set({ use_calendar: event.target.checked });
+            API.storage.sync.set({ use_calendar: event.target.checked, calendarAccessToken: "", calendarEvents: [], calendarUpdateTime: 0, now_fetching_calendar_info: false });
         }
+    });
+
+    document.addEventListener('click', async (event) => {
+        if (event.target.matches('#location_search')) {
+            const fullLanguageTag = navigator.language || navigator.userLanguage;
+            const singleLanguageCode = fullLanguageTag.split('-')[0];
+            const response = await fetch(`${serverUrl}?location=${encodeURIComponent(document.querySelector("#location").value)}&lang=${singleLanguageCode}`);
+            const data = await response.json();
+            console.log(data);
+            if (data.status === "OK") {
+                document.querySelector("#location").value = data.results[0].formatted_address;
+                API.storage.sync.set({ formatted_address: data.results[0].formatted_address, weather_loc: {latitude: data.results[0].geometry.location.lat, longitude: data.results[0].geometry.location.lng} });
+            }
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        if (event.target.matches('#location') && event.key === "Enter")
+            document.querySelector("#location_search").click()
     });
 }
 

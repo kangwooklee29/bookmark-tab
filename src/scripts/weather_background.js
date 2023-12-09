@@ -2,7 +2,8 @@ let API = (navigator.userAgent.indexOf("Firefox") != -1) ? browser : chrome;
 let n = 10;
 let config;
 let calendarAccessToken = null;
-const calendarClientId = '427328739540-3jorcqa54ie31ilrliejf9ko15ctjdj1.apps.googleusercontent.com';
+const calendarClientId = "427328739540-3jorcqa54ie31ilrliejf9ko15ctjdj1.apps.googleusercontent.com";
+const calendarServerUrl = "https://asia-northeast3-project-for-bookmark-tab.cloudfunctions.net/get_access_token";
 
 // 옵션에서 새로운 주소지를 설정한 경우, 새 탭 페이지를 열었는데 현재 시간이 저장된 시간과 다른 경우 메시지 전송이 이뤄진다.
 API.runtime.onMessage.addListener(
@@ -10,14 +11,14 @@ API.runtime.onMessage.addListener(
     const now = new Date();
     if (request.greeting === "fetchWeather") {
       update_weather(now, new Date(request.weather_info_datetime), request.weather_loc, request.weather_info).then(response => {
-        API.storage.sync.set({ weather_info: response.weather_info, weather_info_datetime: response.update_datetime, weather_loc: request.weather_loc }, () => {
+        API.storage.sync.set({ weather_info: response.weather_info, weather_info_datetime: response.weather_info_datetime, weather_loc: request.weather_loc }, () => {
           sendResponse({farewell: true, weather_info: response.weather_info});
         });  
       });
     } else if (request.greeting === "fetchCalendarEvents") {
-      fetchCalendarEvents(now, new Date(request.calendarUpdateTime), request.calendarEvents).then(response => {
-        API.storage.sync.set({ calendarEvents: response.events, calendarUpdateTime: response.update_datetime, use_calendar: response.use_calendar }, () => {
-          sendResponse({farewell: true, calendarEvents: response.events, use_calendar: response.use_calendar});
+      fetchCalendarEvents(now, new Date(request.calendarUpdateTime), request).then(response => {
+        API.storage.sync.set(response, () => {
+          sendResponse({farewell: true, calendarEvents: response.calendarEvents, use_calendar: response.use_calendar});
         });
       });
     }
@@ -38,12 +39,7 @@ chrome.alarms.onAlarm.addListener(() => {
   API.storage.sync.get(null, async (items) => {
     let now = new Date();
     update_weather(now, new Date(items.weather_info_datetime), items.weather_loc, items.weather_info).then(response => {
-      API.storage.sync.set({ weather_info: response.weather_info, weather_info_datetime: response.update_datetime }, () => {
-        console.log("done");
-      });  
-    });
-    fetchCalendarEvents(now, new Date(items.calendarUpdateTime), items.calendarEvents).then(response => {
-      API.storage.sync.set({ calendarEvents: response.events, calendarUpdateTime: response.update_datetime, use_calendar: response.use_calendar }, () => {
+      API.storage.sync.set({ weather_info: response.weather_info, weather_info_datetime: response.weather_info_datetime }, () => {
         console.log("done");
       });
     });
@@ -91,7 +87,7 @@ function get_icon_str(is_day, pty) {
 async function update_weather(cur_date, stored_date, weather_loc, prev_weather_info) {
   const weather_info = [], records = [];
 
-  if (cur_date.getHours() === stored_date.getHours()) return {weather_info: prev_weather_info, update_datetime: stored_date.getTime()};
+  if (cur_date.getHours() === stored_date.getHours()) return {weather_info: prev_weather_info, weather_info_datetime: stored_date.getTime()};
 
   if (!config) {
     const response = await fetch('../../weather_api_key.json');
@@ -199,7 +195,7 @@ async function update_weather(cur_date, stored_date, weather_loc, prev_weather_i
   if (cnt === 1)
     weather_info.push(...prev_weather_info.slice(1));
 
-  return {weather_info: weather_info, update_datetime: cur_date.getTime()};
+  return {weather_info: weather_info, weather_info_datetime: cur_date.getTime()};
 }
 
 function formatDate(date) {
@@ -209,59 +205,74 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-async function fetchCalendarEvents(cur_date, stored_date, stored_events) {
-  if (cur_date.getHours() === stored_date.getHours() && cur_date - stored_date <= 1000 * 60 * 2) return {events: stored_events, update_datetime: stored_date.getTime(), use_calendar: true};
+async function fetchCalendarEvents(cur_date, stored_date, args) {
+  if (cur_date.getHours() === stored_date.getHours() && cur_date - stored_date <= 1000 * 60 * 2) return {calendarEvents: args.calendarEvents, calendarUpdateTime: stored_date.getTime(), use_calendar: true};
+  if (args.use_calendar === false) return {};
 
-  if (!calendarAccessToken) {
-    const items = await API.storage.sync.get(["calendarAccessToken"]);
-    if (!items.calendarAccessToken) {
+    if (!args.calendarAccessToken) {
       const redirectUrl = await new Promise((resolve, reject) => {
+        chrome.storage.sync.set({now_fetching_calendar_info: true});
         chrome.identity.launchWebAuthFlow({
-          url: `https://accounts.google.com/o/oauth2/auth?client_id=${calendarClientId}&response_type=token&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar')}&redirect_uri=${encodeURIComponent(chrome.identity.getRedirectURL())}`,
+          url: `https://accounts.google.com/o/oauth2/auth?client_id=${calendarClientId}&response_type=code&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar.events.owned.readonly')}&redirect_uri=${encodeURIComponent(chrome.identity.getRedirectURL())}&access_type=offline&prompt=consent`,
           interactive: true
         }, (result) => {
           if (chrome.runtime.lastError || !result)
-            reject(chrome.runtime.lastError);
+            resolve(null);
           else
             resolve(result);
         });
       });
       if (redirectUrl) {
         const url = new URL(redirectUrl);
-        calendarAccessToken = url.hash.match(/access_token=([^&]+)/)[1];
-        API.storage.sync.set({calendarAccessToken: calendarAccessToken, use_calendar: true});
+        const code = url.searchParams.get('code');
+        if (code) {
+          try {
+            console.log("no access token");
+            const response = await fetch(`${calendarServerUrl}?code=${code}&redirect_uri=${encodeURIComponent(chrome.identity.getRedirectURL())}`);
+            const data = await response.json();
+            args.calendarAccessToken = data.access_token;
+            chrome.storage.sync.set({calendarAccessToken: data.access_token, session_id: data.session_id});
+          } catch (error) {
+            reject(error);
+          }
+        }
       } else {
-        return {events: [], update_datetime: cur_date.getTime(), use_calendar: false};
+        return {calendarEvents: [], calendarUpdateTime: cur_date.getTime(), use_calendar: false};
       }
-    } else
-      calendarAccessToken = items.calendarAccessToken;
-  }
+    }
 
   let thisWeek = new Date();
   thisWeek.setDate(thisWeek.getDate() - thisWeek.getDay());
   const nextWeek = new Date(thisWeek.getTime() + 14 * 24 * 60 * 60 * 1000);
   const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${formatDate(thisWeek)}T00:00:00Z&timeMax=${formatDate(nextWeek)}T00:00:00Z`;
   let events = [];
-  let response = [];
   for (let i = 0; i < 5; i++) {
     try {
-      response = await fetch(url, { headers: { 'Authorization': `Bearer ${calendarAccessToken}` } });
+      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${args.calendarAccessToken}` } });
+      if (response.status === 401 || response.status === 403) {
+        console.log("no response");
+        const response = await fetch(`${calendarServerUrl}?redirect_uri=${encodeURIComponent(chrome.identity.getRedirectURL())}&session_id=${args.session_id}`);
+        const data = await response.json();
+        console.log(data, args);
+        args.calendarAccessToken = data.access_token;
+        API.storage.sync.set({calendarAccessToken: data.access_token});  
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return await fetchCalendarEvents(cur_date, stored_date, args);    
+      }
       const data = await response.json();
       events = data.items;
       break;
     } catch (error) {
       if (i < 4) { // 마지막 시도에서는 대기하지 않음
-        console.error(`Attempt ${i + 1} failed, retrying in 1 second...`);
+        console.error(`Attempt ${i + 1} failed, retrying in 1 second...`, error);
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
   }
   if (!events) {
-    console.error('Failed to fetch calendar info', response);
-    calendarAccessToken = null;
-    API.storage.sync.set({calendarAccessToken: null});  
+    console.error('Failed to fetch calendar info');
     await new Promise(resolve => setTimeout(resolve, 3000));
-    return await fetchCalendarEvents(cur_date, stored_date, stored_events);
+    return await fetchCalendarEvents(cur_date, stored_date, args);
   }
-  return {events: events, update_datetime: cur_date.getTime(), use_calendar: true};
+  return {calendarEvents: events, calendarUpdateTime: cur_date.getTime(), use_calendar: true, now_fetching_calendar_info: false};
 }

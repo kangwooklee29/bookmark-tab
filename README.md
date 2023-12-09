@@ -9,7 +9,7 @@ You can view your bookmarks on the new tab page of your browser, and easily rear
 
 ## Permissions
 - Bookmark Data: We collect information related to the bookmarks you save. This data is processed solely on your device.
-- Calendar Access: In order to display notifications and reminders from Google Calendar, we require access to your calendar data. This information is used solely to provide you with timely notifications.
+- Calendar Access: In order to display notifications and reminders from Google Calendar, we require access to your calendar data. This information is used solely to provide you with reminders.
 
 ## Notes
 - We collect information related to your geolocation to offer weather forecast information. Your location is approximated based on your IP address. The approximated information is transmitted to [OpenWeatherMap](https://openweathermap.org/) API to provide the service.

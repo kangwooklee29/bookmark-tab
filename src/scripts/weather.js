@@ -67,11 +67,12 @@ async function displayWeather(weatherInfo) {
 async function fetch_weather_loc() {
   const ipResponse = await fetch('https://api64.ipify.org/?format=json');
   const ipData = await ipResponse.json();
+  console.log(ipData);
 
   const locationResponse = await fetch(`https://ipapi.co/${ipData.ip}/json/`);
   const locData = await locationResponse.json();
-  
   console.log(locData);
+
   return locData;
 }
 
@@ -83,14 +84,15 @@ function fetch_and_run(items) {
   });
 }
 
-API.storage.sync.get(['weather_info_datetime', 'weather_info', 'weather_loc'], async (items) => {
+API.storage.sync.get(['weather_info_datetime', 'weather_info', 'weather_loc', 'formatted_address'], async (items) => {
   let weather_loc = items.weather_loc;
   if (!items.weather_loc) {
     weather_loc = await fetch_weather_loc();
     fetch_and_run({weather_loc: weather_loc, weather_info: items.weather_info, weather_info_datetime: items.weather_info_datetime});
   } else {
     fetch_and_run({weather_loc: weather_loc, weather_info: items.weather_info, weather_info_datetime: items.weather_info_datetime});
-    if (new Date().getTime() - items.weather_info_datetime <= 1000 * 60 * 60) return;
+    if (new Date().getTime() - items.weather_info_datetime <= 1000 * 60 * 60 || items.formatted_address) return;
+    console.log("needed to update weather location");
     const new_loc = await fetch_weather_loc();
     if (new_loc.latitude != weather_loc.latitude || new_loc.longitude != weather_loc.longitude) {
       document.getElementById('weatherTable').innerHTML = "";

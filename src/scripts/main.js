@@ -90,6 +90,16 @@ function renderCalendarEvents(events) {
     }
 }
 
+function colorFolderList() {
+    const color = document.body.style.backgroundColor;
+    let rgbValues = color ? color.match(/[\d.]+/g).map(Number) : [255, 255, 255];
+    let fontColor = 0.299 * rgbValues[0] + 0.587 * rgbValues[1] + 0.114 * rgbValues[2] < 128 ? "white" : "rgb(32, 33, 36)";
+    let blendedColor = blendColors(color, "rgba(32, 33, 36, 0.4)");
+    let decidedColor = document.querySelector("div.folder_list").children.length === 1 ? blendedColor : fontColor;
+    document.querySelector("div.folder_list").style.color = decidedColor;
+    document.querySelectorAll("div.folder_list > span").forEach(el => { el.style.color = decidedColor; });
+}
+
 function calcIconWrapperColor(color) {
     if (!color) color = "rgb(255, 255, 255)";
     let ov = color.match(/[\d.]+/g).map(Number);
@@ -113,7 +123,7 @@ function updateBackgroundColor(color) {
     let rgbValues = color ? color.match(/[\d.]+/g).map(Number) : [255, 255, 255];
     let fontColor = 0.299 * rgbValues[0] + 0.587 * rgbValues[1] + 0.114 * rgbValues[2] < 128 ? "white" : "rgb(32, 33, 36)";
     document.querySelectorAll("div").forEach(elem=> {elem.style.color = fontColor;});
-    document.querySelectorAll("span").forEach(elem=> {elem.style.color = fontColor;});
+    document.querySelectorAll("span").forEach(elem=> {elem.style.color = fontColor; console.log(1)});
     document.querySelectorAll("a").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("div.mod_box input").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.color = fontColor;});
@@ -136,6 +146,7 @@ function updateBackgroundColor(color) {
         if (elem.style && elem.style.backgroundColor === color) elem.classList.add("color-clicked");
         else if (elem.nodeName === "DIV") elem.classList.remove("color-clicked");
     });
+    colorFolderList();
 
     if (debounceTimer)
         clearTimeout(debounceTimer);
@@ -373,13 +384,18 @@ class Main{
             if (this.weather_visibility) {
                 this.weather_info_obj.querySelector("iframe").src = "../../components/weather.html";
             }
-            var self = this;
-            API.bookmarks.getTree(function(bookmarkTreeNodes) {
-                let counts = bookmarkTreeNodes[0].children.map(node => node.children ? node.children.length : 0);
-                let maxCount = Math.max(...counts);
-                initial_folder_id = bookmarkTreeNodes[0].children[counts.indexOf(maxCount)].id;
-                self.move_folder(initial_folder_id);
-            });
+            initial_folder_id = items.initial_folder_id;
+            if (!initial_folder_id) {
+                const self = this;
+                initial_folder_id = await API.bookmarks.getTree( bookmarkTreeNodes => {
+                    let counts = bookmarkTreeNodes[0].children.map(node => node.children ? node.children.length : 0);
+                    let maxCount = Math.max(...counts);
+                    initial_folder_id = bookmarkTreeNodes[0].children[counts.indexOf(maxCount)].id;
+                    API.storage.sync.set({initial_folder_id});
+                    self.move_folder(initial_folder_id);
+                });
+            } else
+                this.move_folder(initial_folder_id);
         });
     }
 
@@ -399,18 +415,12 @@ class Main{
         this.cells = {};
         this.img_dict = {};
         this.$target.innerHTML = "";
-        if (this.folder_id !== initial_folder_id)
-        {
+        if (this.folder_id !== initial_folder_id) { // 하위 디렉토리
             if (this.weather_info_obj.classList.contains("hide") === false)
                 this.weather_info_obj.classList.add("hide");
             this.folder_list_obj.classList.remove("hide");
-        }
-        else
-        {
-            if (this.folder_list_obj.classList.contains("hide") === false)
-                this.folder_list_obj.classList.add("hide");
+        } else {
             this.weather_info_obj.classList.remove("hide");
-            var now = new Date();
         }
     }
 
@@ -427,10 +437,32 @@ class Main{
             cnt--;
         }
 
-        this.folder_list_obj.innerHTML = (folder_stack.length === 1)  ? "" : [...folder_stack].reverse().map((e)=>{return `<span id="${e.id}">${e.title}</span>`}).join("&nbsp;>&nbsp;") + "&nbsp;>";
+        this.folder_list_obj.innerHTML = [...folder_stack].reverse().map((e)=>{return `<span id="${e.id}">${e.title}</span>`}).join("&nbsp;>&nbsp;") + "&nbsp;>";
+        colorFolderList();
     }
 
-    move_folder(id) {
+    async move_folder(id) {
+        if (this.folder_id === id) {
+            const arr = await API.bookmarks.getChildren((await API.bookmarks.get(id))[0].parentId);
+            
+            const id_list = [];
+            let cur_id = null;
+            for (const el of arr) {
+                if (!(el.url)) {
+                    id_list.push(el);
+                    if (el.id === id)
+                        cur_id = id_list.length - 1;
+                }
+            }
+            let next_id = id_list[(cur_id + 1) % id_list.length].id;
+
+            if (id === initial_folder_id) {
+                initial_folder_id = next_id;
+                API.storage.sync.set({initial_folder_id});
+            }
+
+            id = next_id;
+        }
         this.folder_id = id;
         this.print_folder_list();
         this.clear_main();

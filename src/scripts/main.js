@@ -52,7 +52,7 @@ function renderCalendarEvents(events) {
         const cur_day_key = `${String(cur_date.getMonth() + 1).padStart(2, '0')}/${String(cur_date.getDate()).padStart(2, '0')}`;
         if (cur_day_key === today_str)
             cur_day_str = `<b>${cur_day_str}</b>`;
-        if (cur_day_key < today_str && !(cur_day_key.substring(0, 2) === "01" && today_str.substring(0, 2) === "12"))
+        if (cur_day_key < today_str || (cur_day_key.substring(0, 2) === "12" && today_str.substring(0, 2) === "01"))
             itemElement.classList.add("past-day");
         itemElement.innerHTML = `<span class="calendar-day-title">${cur_day_str}</span>`;
         if (eventObj[cur_day_key])
@@ -97,6 +97,7 @@ function colorFolderList() {
     let blendedColor = blendColors(color, "rgba(32, 33, 36, 0.4)");
     let decidedColor = document.querySelector("div.folder_list").children.length === 1 ? blendedColor : fontColor;
     document.querySelector("div.folder_list").style.color = decidedColor;
+    document.querySelector("div.folder_list").style.fontWeight = document.querySelector("div.folder_list").children.length === 1 ? 300 : 400;
     document.querySelectorAll("div.folder_list > span").forEach(el => { el.style.color = decidedColor; });
 }
 

@@ -123,7 +123,7 @@ function updateBackgroundColor(color) {
     let rgbValues = color ? color.match(/[\d.]+/g).map(Number) : [255, 255, 255];
     let fontColor = 0.299 * rgbValues[0] + 0.587 * rgbValues[1] + 0.114 * rgbValues[2] < 128 ? "white" : "rgb(32, 33, 36)";
     document.querySelectorAll("div").forEach(elem=> {elem.style.color = fontColor;});
-    document.querySelectorAll("span").forEach(elem=> {elem.style.color = fontColor; console.log(1)});
+    document.querySelectorAll("span").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("a").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("div.mod_box input").forEach(elem=> {elem.style.color = fontColor;});
     document.querySelectorAll("div.mod_box button").forEach(elem=> {elem.style.color = fontColor;});

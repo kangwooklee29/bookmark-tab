@@ -17,17 +17,13 @@ body {
 
 .header-container {
     justify-content: flex-start; 
-    text-align: left;
-    flex-wrap: nowrap; 
     padding-left: 10px;
-    height:100px;
+    height:130px;
     width: 600px;
-    margin-bottom: 20px;
-    margin-top:50px;
+    margin-top:40px;
 }  
 
 div.header-container > a > img, svg{
-    margin-top:25px;
     margin-right: 12px;
     height: 25px;
     width: 25px;
@@ -44,7 +40,6 @@ h1{
 .current-time {
     font-weight: 200;
     font-size: 12pt; 
-    margin-top: 20px;
     margin-left: 115px;
     padding: 5px;
     white-space: nowrap;
@@ -347,8 +342,6 @@ div.logo {
     background-color: #fff;
     height: 40px;
     width: 250px;
-    margin-top: 20px;
-    margin-left: 5px;
     box-shadow: 0 1px 6px #20212447;
 }
 

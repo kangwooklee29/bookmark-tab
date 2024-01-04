@@ -215,7 +215,7 @@ document.querySelector("#colorPicker").addEventListener("input", e => {
 document.querySelector("div.bookmark-search input").addEventListener("input", e => { 
     if (debounceTimer)
         clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => { main.move_folder(main.folder_id); }, 300);
+    debounceTimer = setTimeout(() => { main.move_folder(main.folder_id, true); }, 300);
 });
 
 document.body.addEventListener("click", (e)=>
@@ -442,8 +442,8 @@ class Main{
         colorFolderList();
     }
 
-    async move_folder(id) {
-        if (this.folder_id === id) {
+    async move_folder(id, isSearch = false) {
+        if (this.folder_id === id && !isSearch) {
             const arr = await API.bookmarks.getChildren((await API.bookmarks.get(id))[0].parentId);
             
             const id_list = [];

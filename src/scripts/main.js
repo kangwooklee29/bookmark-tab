@@ -443,7 +443,8 @@ class Main{
     }
 
     async move_folder(id) {
-        if (this.folder_id === id) {
+        const keyword = document.querySelector("div.bookmark-search input").value;
+        if (this.folder_id === id && !keyword) {
             const arr = await API.bookmarks.getChildren((await API.bookmarks.get(id))[0].parentId);
             
             const id_list = [];
@@ -467,7 +468,6 @@ class Main{
         this.folder_id = id;
         this.print_folder_list();
         this.clear_main();
-        const keyword = document.querySelector("div.bookmark-search input").value;
         API.bookmarks.getChildren(id, async (b) => {
             for (var e of b) {
                 if (!keyword || e.title.toLowerCase().includes(keyword.toLowerCase()) || (e.url && e.url.toLowerCase().includes(keyword.toLowerCase())) || !('url' in e) || !e.url) {
